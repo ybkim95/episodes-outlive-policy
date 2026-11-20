@@ -1,0 +1,20 @@
+{
+ "H": 64,
+ "W": 8,
+ "lag": 0,
+ "sync": false,
+ "credit": "A0",
+ "correction": "none",
+ "groups": 32,
+ "group_size": 8,
+ "iters": 600,
+ "lr": 0.001,
+ "seed": 101,
+ "eval_every": 10,
+ "eval_episodes": 512,
+ "device": "cuda",
+ "out": "runs",
+ "name": "A0_H64_W8_lr0.001_s101",
+ "src_hash": "993030463fb0",
+ "torch": "2.8.0+cu128"
+}

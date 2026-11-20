@@ -1,0 +1,47 @@
+it=   0 steps=     5720 train=+0.064 eval=+0.068 goal=0.117 kl=-3.6e-11 ess=1.00 beta=0.300 1s
+it=  25 steps=   110656 train=+0.114 eval=+0.117 goal=0.121 kl=3.9e-10 ess=1.00 beta=0.300 12s
+it=  50 steps=   204672 train=+0.109 eval=+0.129 goal=0.131 kl=-8.5e-10 ess=1.00 beta=0.300 23s
+it=  75 steps=   311480 train=+0.083 eval=+0.120 goal=0.121 kl=-1.8e-10 ess=1.00 beta=0.300 67s
+it= 100 steps=   413608 train=+0.148 eval=+0.135 goal=0.137 kl=-6.1e-10 ess=1.00 beta=0.300 81s
+it= 125 steps=   512616 train=+0.234 eval=+0.222 goal=0.223 kl=2.3e-10 ess=1.00 beta=0.300 92s
+it= 150 steps=   612872 train=+0.287 eval=+0.370 goal=0.371 kl=1.6e-10 ess=1.00 beta=0.300 103s
+it= 175 steps=   727480 train=+0.533 eval=+0.505 goal=0.506 kl=5.7e-10 ess=1.00 beta=0.300 114s
+it= 200 steps=   825552 train=+0.611 eval=+0.652 goal=0.652 kl=3.5e-10 ess=1.00 beta=0.300 124s
+it= 225 steps=   921440 train=+0.848 eval=+0.812 goal=0.812 kl=0.0e+00 ess=1.00 beta=0.300 135s
+it= 250 steps=  1021072 train=+0.988 eval=+0.982 goal=0.982 kl=-2.9e-11 ess=1.00 beta=0.300 146s
+it= 275 steps=  1121328 train=+0.993 eval=+0.978 goal=0.979 kl=-8.4e-13 ess=1.00 beta=0.300 158s
+it= 300 steps=  1238744 train=+0.998 eval=+0.992 goal=0.992 kl=-2.2e-12 ess=1.00 beta=0.300 169s
+it= 325 steps=  1349920 train=+0.995 eval=+0.996 goal=0.996 kl=0.0e+00 ess=1.00 beta=0.300 180s
+it= 350 steps=  1439256 train=+1.000 eval=+0.998 goal=0.998 kl=9.0e-12 ess=1.00 beta=0.300 191s
+it= 375 steps=  1538264 train=+1.000 eval=+1.000 goal=1.000 kl=1.1e-12 ess=1.00 beta=0.300 202s
+it= 400 steps=  1656928 train=+1.000 eval=+1.000 goal=1.000 kl=1.4e-13 ess=1.00 beta=0.300 214s
+it= 425 steps=  1774656 train=+1.000 eval=+1.000 goal=1.000 kl=-1.7e-12 ess=1.00 beta=0.300 226s
+it= 450 steps=  1889264 train=+0.998 eval=+1.000 goal=1.000 kl=-5.6e-13 ess=1.00 beta=0.300 237s
+it= 475 steps=  1994512 train=+0.998 eval=+1.000 goal=1.000 kl=-7.0e-14 ess=1.00 beta=0.300 248s
+it= 500 steps=  2087592 train=+1.000 eval=+0.996 goal=0.996 kl=1.4e-13 ess=1.00 beta=0.300 259s
+it= 525 steps=  2183792 train=+0.995 eval=+0.998 goal=0.998 kl=-2.2e-12 ess=1.00 beta=0.300 270s
+it= 550 steps=  2302456 train=+1.000 eval=+0.996 goal=0.996 kl=0.0e+00 ess=1.00 beta=0.300 281s
+it= 575 steps=  2401776 train=+1.000 eval=+0.996 goal=0.996 kl=8.4e-13 ess=1.00 beta=0.300 292s
+it= 600 steps=  2514200 train=+1.000 eval=+1.000 goal=1.000 kl=-2.1e-11 ess=1.00 beta=0.300 303s
+it= 625 steps=  2617888 train=+1.000 eval=+1.000 goal=1.000 kl=-1.1e-12 ess=1.00 beta=0.300 313s
+it= 650 steps=  2718144 train=+1.000 eval=+1.000 goal=1.000 kl=-7.0e-14 ess=1.00 beta=0.300 324s
+it= 675 steps=  2822144 train=+1.000 eval=+1.000 goal=1.000 kl=-5.0e-13 ess=1.00 beta=0.300 336s
+it= 700 steps=  2930200 train=+0.998 eval=+0.998 goal=0.998 kl=7.0e-13 ess=1.00 beta=0.300 348s
+it= 725 steps=  3033576 train=+1.000 eval=+0.998 goal=0.998 kl=-1.8e-11 ess=1.00 beta=0.300 359s
+it= 750 steps=  3135392 train=+1.000 eval=+1.000 goal=1.000 kl=1.4e-11 ess=1.00 beta=0.300 371s
+it= 775 steps=  3240952 train=+1.000 eval=+1.000 goal=1.000 kl=2.4e-12 ess=1.00 beta=0.300 383s
+it= 800 steps=  3335280 train=+1.000 eval=+1.000 goal=1.000 kl=-7.0e-14 ess=1.00 beta=0.300 395s
+it= 825 steps=  3432728 train=+1.000 eval=+1.000 goal=1.000 kl=0.0e+00 ess=1.00 beta=0.300 410s
+it= 850 steps=  3548272 train=+1.000 eval=+1.000 goal=1.000 kl=0.0e+00 ess=1.00 beta=0.300 439s
+it= 875 steps=  3653208 train=+1.000 eval=+1.000 goal=1.000 kl=0.0e+00 ess=1.00 beta=0.300 452s
+it= 900 steps=  3755648 train=+1.000 eval=+1.000 goal=1.000 kl=0.0e+00 ess=1.00 beta=0.300 544s
+it= 925 steps=  3842176 train=+1.000 eval=+1.000 goal=1.000 kl=0.0e+00 ess=1.00 beta=0.300 654s
+it= 950 steps=  3943992 train=+1.000 eval=+1.000 goal=1.000 kl=0.0e+00 ess=1.00 beta=0.300 754s
+it= 975 steps=  4050800 train=+1.000 eval=+1.000 goal=1.000 kl=-1.8e-11 ess=1.00 beta=0.300 906s
+it=1000 steps=  4156048 train=+1.000 eval=+1.000 goal=1.000 kl=8.4e-13 ess=1.00 beta=0.300 1060s
+it=1025 steps=  4265976 train=+1.000 eval=+1.000 goal=1.000 kl=0.0e+00 ess=1.00 beta=0.300 1098s
+it=1050 steps=  4355312 train=+1.000 eval=+1.000 goal=1.000 kl=0.0e+00 ess=1.00 beta=0.300 1110s
+it=1075 steps=  4446208 train=+1.000 eval=+1.000 goal=1.000 kl=0.0e+00 ess=1.00 beta=0.300 1148s
+it=1100 steps=  4549584 train=+1.000 eval=+1.000 goal=1.000 kl=1.6e-13 ess=1.00 beta=0.300 1269s
+it=1125 steps=  4651712 train=+1.000 eval=+1.000 goal=1.000 kl=0.0e+00 ess=1.00 beta=0.300 1385s
+it=1150 steps=  4750408 train=+1.000 eval=+1.000 goal=1.000 kl=-5.9e-13 ess=1.00 beta=0.300 1498s

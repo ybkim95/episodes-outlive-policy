@@ -1,0 +1,143 @@
+goal=G5 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> PASS G3      logp=-2.30 r=-0.00
+t=  1 v=+0 mem=NONE | <mate> SAYS G5         -> PASS G4      logp=-0.55 r=-0.00
+t=  2 v=+0 mem=NONE | <user> CHAT C1         -> PASS G3      logp=-2.39 r=-0.00
+t=  3 v=+0 mem=NONE | <user> CHAT C2         -> PASS NONE    logp=-2.64 r=-0.00
+t=  4 v=+0 mem=NONE | <user> CHAT C2         -> PASS G4      logp=-0.53 r=-0.00
+t=  5 v=+0 mem=NONE | <user> CHAT C1         -> PASS G1      logp=-3.37 r=-0.00
+t=  6 v=+0 mem=NONE | <user> CHAT C0         -> PASS G3      logp=-2.06 r=-0.00
+t=  7 v=+0 mem=NONE | <user> NOW G6          -> PASS G4      logp=-0.78 r=-0.00
+t=  8 v=+0 mem=NONE | <user> CHAT C1         -> PASS G6      logp=-2.15 r=-0.00
+t=  9 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.51 r=-0.00
+t= 10 v=+0 mem=NONE | <user> CHAT C2         -> PASS G4      logp=-0.71 r=-0.00
+t= 11 v=+0 mem=NONE | <user> CHAT C0         -> PASS G1      logp=-3.43 r=-0.00
+t= 12 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-1.03 r=-0.00
+t= 13 v=+0 mem=NONE | <user> CHAT C2         -> PASS G5      logp=-3.11 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.74 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> PASS G4      logp=-1.04 r=+0.00
+
+goal=G3 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> PASS G7      logp=-2.37 r=-0.00
+t=  1 v=+0 mem=NONE | <mate> SAYS G3         -> PASS G4      logp=-0.56 r=-0.00
+t=  2 v=+0 mem=NONE | <user> CHAT C2         -> PASS G4      logp=-0.71 r=-0.00
+t=  3 v=+0 mem=NONE | <mate> SAYS G3         -> PASS G6      logp=-1.90 r=-0.00
+t=  4 v=+0 mem=NONE | <user> CHAT C3         -> PASS G4      logp=-0.53 r=-0.00
+t=  5 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.77 r=-0.00
+t=  6 v=+0 mem=NONE | <user> CHAT C3         -> PASS G6      logp=-2.18 r=-0.00
+t=  7 v=+0 mem=NONE | <user> CHAT C3         -> PASS NONE    logp=-2.77 r=-0.00
+t=  8 v=+0 mem=NONE | <user> CHAT C2         -> PASS G7      logp=-2.95 r=-0.00
+t=  9 v=+0 mem=NONE | <user> CHAT C0         -> PASS G6      logp=-2.29 r=-0.00
+t= 10 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.72 r=-0.00
+t= 11 v=+0 mem=NONE | <user> CHAT C3         -> PASS G4      logp=-0.68 r=-0.00
+t= 12 v=+0 mem=NONE | <user> CHAT C0         -> PASS G3      logp=-2.29 r=-0.00
+t= 13 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.71 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C3         -> PASS G5      logp=-3.07 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> PASS G3      logp=-2.12 r=+0.00
+
+goal=G6 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> PASS G4      logp=-0.92 r=-0.00
+t=  1 v=+0 mem=NONE | <mate> SAYS G6         -> PASS G3      logp=-2.67 r=-0.00
+t=  2 v=+0 mem=NONE | <mate> SAYS G6         -> PASS G4      logp=-0.68 r=-0.00
+t=  3 v=+0 mem=NONE | <user> CHAT C3         -> PASS G4      logp=-0.65 r=-0.00
+t=  4 v=+0 mem=NONE | <user> CHAT C3         -> PASS G4      logp=-0.52 r=-0.00
+t=  5 v=+0 mem=NONE | <user> CHAT C3         -> PASS G4      logp=-0.77 r=-0.00
+t=  6 v=+0 mem=NONE | <user> CHAT C2         -> PASS NONE    logp=-2.47 r=-0.00
+t=  7 v=+0 mem=NONE | <user> CHAT C1         -> PASS G6      logp=-1.91 r=-0.00
+t=  8 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.71 r=-0.00
+t=  9 v=+0 mem=NONE | <user> CHAT C2         -> PASS G4      logp=-0.51 r=-0.00
+t= 10 v=+0 mem=NONE | <user> CHAT C3         -> PASS G7      logp=-3.33 r=-0.00
+t= 11 v=+0 mem=NONE | <user> CHAT C2         -> PASS G4      logp=-0.69 r=-0.00
+t= 12 v=+0 mem=NONE | <user> CHAT C3         -> PASS G2      logp=-3.00 r=-0.00
+t= 13 v=+0 mem=NONE | <user> CHAT C3         -> PASS G3      logp=-2.18 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C1         -> PASS G7      logp=-2.97 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> PASS G7      logp=-2.12 r=+0.00
+
+goal=G1 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> PASS G4      logp=-0.92 r=-0.00
+t=  1 v=+0 mem=NONE | <user> CHAT C3         -> PASS G1      logp=-3.39 r=-0.00
+t=  2 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.70 r=-0.00
+t=  3 v=+0 mem=NONE | <user> CHAT C2         -> PASS G7      logp=-2.83 r=-0.00
+t=  4 v=+0 mem=NONE | <user> NOW G7          -> PASS G6      logp=-2.01 r=-0.00
+t=  5 v=+0 mem=NONE | <user> CHAT C3         -> PASS G7      logp=-2.86 r=-0.00
+t=  6 v=+0 mem=NONE | <user> CHAT C1         -> PASS NONE    logp=-2.49 r=-0.00
+t=  7 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.79 r=-0.00
+t=  8 v=+0 mem=NONE | <user> CHAT C2         -> PASS G3      logp=-1.97 r=-0.00
+t=  9 v=+0 mem=NONE | <user> CHAT C3         -> PASS G4      logp=-0.52 r=-0.00
+t= 10 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.73 r=-0.00
+t= 11 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.70 r=-0.00
+t= 12 v=+0 mem=NONE | <user> CHAT C2         -> PASS G3      logp=-2.29 r=-0.00
+t= 13 v=+0 mem=NONE | <user> CHAT C0         -> PASS G2      logp=-3.45 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C2         -> PASS G3      logp=-2.13 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> PASS G4      logp=-1.03 r=+0.00
+
+goal=G1 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> PASS G0      logp=-3.95 r=-0.00
+t=  1 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.56 r=-0.00
+t=  2 v=+0 mem=NONE | <mate> SAYS G1         -> PASS G6      logp=-2.14 r=-0.00
+t=  3 v=+0 mem=NONE | <mate> SAYS G1         -> PASS G4      logp=-0.62 r=-0.00
+t=  4 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.51 r=-0.00
+t=  5 v=+0 mem=NONE | <user> CHAT C0         -> PASS NONE    logp=-2.87 r=-0.00
+t=  6 v=+0 mem=NONE | <user> CHAT C2         -> PASS G4      logp=-0.73 r=-0.00
+t=  7 v=+0 mem=NONE | <user> CHAT C1         -> PASS G3      logp=-2.11 r=-0.00
+t=  8 v=+0 mem=NONE | <user> CHAT C3         -> PASS G3      logp=-2.01 r=-0.00
+t=  9 v=+0 mem=NONE | <user> CHAT C2         -> PASS G5      logp=-3.09 r=-0.00
+t= 10 v=+0 mem=NONE | <user> CHAT C0         -> PASS G6      logp=-2.00 r=-0.00
+t= 11 v=+0 mem=NONE | <user> CHAT C2         -> PASS G4      logp=-0.68 r=-0.00
+t= 12 v=+0 mem=NONE | <user> CHAT C1         -> PASS G6      logp=-1.80 r=-0.00
+t= 13 v=+0 mem=NONE | <user> CHAT C0         -> PASS G7      logp=-2.60 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C2         -> PASS G4      logp=-0.73 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> PASS G4      logp=-1.04 r=+0.00
+
+goal=G4 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> PASS G4      logp=-0.92 r=-0.00
+t=  1 v=+0 mem=NONE | <user> CHAT C3         -> PASS G5      logp=-3.25 r=-0.00
+t=  2 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.71 r=-0.00
+t=  3 v=+0 mem=NONE | <user> CHAT C1         -> PASS G6      logp=-1.88 r=-0.00
+t=  4 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.54 r=-0.00
+t=  5 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.78 r=-0.00
+t=  6 v=+0 mem=NONE | <user> CHAT C0         -> PASS NONE    logp=-2.47 r=-0.00
+t=  7 v=+0 mem=NONE | <user> CHAT C1         -> PASS G6      logp=-1.92 r=-0.00
+t=  8 v=+0 mem=NONE | <user> CHAT C0         -> PASS G5      logp=-3.19 r=-0.00
+t=  9 v=+0 mem=NONE | <user> CHAT C2         -> PASS G2      logp=-3.56 r=-0.00
+t= 10 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.72 r=-0.00
+t= 11 v=+0 mem=NONE | <user> NOW G2          -> PASS G4      logp=-0.69 r=-0.00
+t= 12 v=+0 mem=NONE | <user> CHAT C3         -> PASS G0      logp=-3.40 r=-0.00
+t= 13 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.71 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C0         -> PASS G6      logp=-2.23 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> PASS G5      logp=-2.66 r=+0.00
+
+goal=G5 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> PASS G7      logp=-2.37 r=-0.00
+t=  1 v=+0 mem=NONE | <mate> SAYS G5         -> PASS G4      logp=-0.56 r=-0.00
+t=  2 v=+0 mem=NONE | <mate> SAYS G5         -> PASS G4      logp=-0.68 r=-0.00
+t=  3 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.65 r=-0.00
+t=  4 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.53 r=-0.00
+t=  5 v=+0 mem=NONE | <user> CHAT C2         -> PASS G3      logp=-2.14 r=-0.00
+t=  6 v=+0 mem=NONE | <user> CHAT C3         -> PASS G5      logp=-2.95 r=-0.00
+t=  7 v=+0 mem=NONE | <user> CHAT C3         -> PASS G4      logp=-0.78 r=-0.00
+t=  8 v=+0 mem=NONE | <user> CHAT C0         -> LOOKUP G6    logp=-8.69 r=-0.00
+t=  9 v=+0 mem=NONE | <user> NOW G0          -> PASS G7      logp=-2.80 r=-0.00
+t= 10 v=+0 mem=NONE | <user> CHAT C3         -> PASS G4      logp=-0.71 r=-0.00
+t= 11 v=+0 mem=NONE | <user> CHAT C0         -> PASS G6      logp=-1.80 r=-0.00
+t= 12 v=+0 mem=NONE | <user> CHAT C0         -> PASS G3      logp=-2.30 r=-0.00
+t= 13 v=+0 mem=NONE | <user> CHAT C1         -> PASS G1      logp=-3.33 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.73 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> PASS G0      logp=-3.27 r=+0.00
+
+goal=G5 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> PASS G4      logp=-0.92 r=-0.00
+t=  1 v=+0 mem=NONE | <user> CHAT C2         -> PASS G4      logp=-0.56 r=-0.00
+t=  2 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.70 r=-0.00
+t=  3 v=+0 mem=NONE | <mate> SAYS G5         -> PASS G3      logp=-2.49 r=-0.00
+t=  4 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.51 r=-0.00
+t=  5 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.75 r=-0.00
+t=  6 v=+0 mem=NONE | <user> CHAT C2         -> PASS G6      logp=-2.19 r=-0.00
+t=  7 v=+0 mem=NONE | <user> CHAT C2         -> PASS NONE    logp=-2.78 r=-0.00
+t=  8 v=+0 mem=NONE | <user> CHAT C0         -> PASS G4      logp=-0.70 r=-0.00
+t=  9 v=+0 mem=NONE | <user> CHAT C0         -> PASS G1      logp=-3.64 r=-0.00
+t= 10 v=+0 mem=NONE | <user> CHAT C3         -> PASS G6      logp=-2.01 r=-0.00
+t= 11 v=+0 mem=NONE | <user> CHAT C0         -> PASS G6      logp=-1.81 r=-0.00
+t= 12 v=+0 mem=NONE | <user> CHAT C2         -> PASS G1      logp=-3.36 r=-0.00
+t= 13 v=+0 mem=NONE | <user> CHAT C3         -> PASS NONE    logp=-3.06 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C1         -> PASS G4      logp=-0.74 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> PASS G3      logp=-2.12 r=+0.00

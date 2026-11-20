@@ -1,0 +1,143 @@
+goal=G5 return=1 version=-1
+t=  0 mem=NONE | <user> START NONE      -> WRITE G4     logp=-1.77
+t=  1 mem=G4   | <user> CHAT C1         -> WRITE G5     logp=-1.22
+t=  2 mem=G5   | <user> CHAT C0         -> WRITE G4     logp=-1.60
+t=  3 mem=G4   | <mate> SAYS G5         -> WRITE G4     logp=-1.81
+t=  4 mem=G4   | <user> CHAT C2         -> WRITE G1     logp=-2.06
+t=  5 mem=G1   | <user> CHAT C3         -> WRITE G2     logp=-2.26
+t=  6 mem=G2   | <user> CHAT C0         -> WRITE G4     logp=-2.04
+t=  7 mem=G4   | <user> CHAT C0         -> WRITE G5     logp=-1.31
+t=  8 mem=G5   | <user> CHAT C2         -> ANSWER G7    logp=-2.61
+t=  9 mem=G5   | <user> CHAT C2         -> WRITE G5     logp=-0.99
+t= 10 mem=G5   | <user> CHAT C1         -> WRITE G3     logp=-2.02
+t= 11 mem=G3   | <user> CHAT C1         -> WRITE G2     logp=-2.48
+t= 12 mem=G2   | <user> CHAT C3         -> WRITE G1     logp=-1.89
+t= 13 mem=G1   | <user> CHAT C1         -> WRITE G6     logp=-2.86
+t= 14 mem=G6   | <user> CHAT C0         -> WRITE G4     logp=-1.58
+t= 15 mem=G4   | <user> QUESTION NONE   -> ANSWER G5    logp=-0.08
+
+goal=G3 return=0 version=-1
+t=  0 mem=NONE | <user> START NONE      -> WRITE G5     logp=-1.48
+t=  1 mem=G5   | <user> CHAT C1         -> WRITE G6     logp=-3.40
+t=  2 mem=G6   | <user> CHAT C1         -> WRITE G1     logp=-2.45
+t=  3 mem=G1   | <user> CHAT C3         -> WRITE G5     logp=-1.10
+t=  4 mem=G5   | <user> CHAT C2         -> WRITE G4     logp=-1.71
+t=  5 mem=G4   | <user> CHAT C3         -> WRITE G5     logp=-1.00
+t=  6 mem=G5   | <user> CHAT C0         -> WRITE G1     logp=-2.30
+t=  7 mem=G1   | <user> CHAT C1         -> WRITE G1     logp=-1.93
+t=  8 mem=G1   | <user> CHAT C2         -> ANSWER G1    logp=-0.67
+t=  9 mem=G1   | <user> CHAT C2         -> WRITE G5     logp=-0.97
+t= 10 mem=G5   | <user> CHAT C1         -> WRITE G2     logp=-2.50
+t= 11 mem=G2   | <user> CHAT C3         -> WRITE G1     logp=-2.52
+t= 12 mem=G1   | <user> CHAT C1         -> WRITE G5     logp=-1.50
+t= 13 mem=G5   | <user> CHAT C3         -> WRITE G1     logp=-1.74
+t= 14 mem=G1   | <user> CHAT C1         -> WRITE G2     logp=-2.84
+t= 15 mem=G2   | <user> QUESTION NONE   -> ANSWER G1    logp=-1.43
+
+goal=G6 return=0 version=-1
+t=  0 mem=NONE | <user> START NONE      -> WRITE G5     logp=-1.48
+t=  1 mem=G5   | <mate> SAYS G6         -> WRITE G6     logp=-3.29
+t=  2 mem=G6   | <mate> SAYS G6         -> WRITE G3     logp=-2.08
+t=  3 mem=G3   | <mate> SAYS G6         -> WRITE G1     logp=-2.07
+t=  4 mem=G1   | <user> CHAT C1         -> WRITE G4     logp=-1.79
+t=  5 mem=G4   | <user> CHAT C0         -> WRITE G1     logp=-2.27
+t=  6 mem=G1   | <user> CHAT C2         -> WRITE G2     logp=-2.28
+t=  7 mem=G2   | <user> CHAT C1         -> WRITE NONE   logp=-1.89
+t=  8 mem=NONE | <user> CHAT C1         -> ANSWER G7    logp=-0.98
+t=  9 mem=NONE | <user> CHAT C1         -> WRITE G3     logp=-2.03
+t= 10 mem=G3   | <user> CHAT C2         -> WRITE G2     logp=-2.45
+t= 11 mem=G2   | <user> CHAT C3         -> ANSWER G0    logp=-4.60
+t= 12 mem=G2   | <user> CHAT C0         -> WRITE G5     logp=-1.53
+t= 13 mem=G5   | <user> CHAT C1         -> WRITE G6     logp=-2.72
+t= 14 mem=G6   | <user> CHAT C2         -> WRITE G4     logp=-1.61
+t= 15 mem=G4   | <user> QUESTION NONE   -> ANSWER G0    logp=-1.52
+
+goal=G1 return=0 version=-1
+t=  0 mem=NONE | <user> START NONE      -> WRITE G5     logp=-1.48
+t=  1 mem=G5   | <user> CHAT C1         -> WRITE G5     logp=-1.11
+t=  2 mem=G5   | <user> CHAT C0         -> WRITE G4     logp=-1.66
+t=  3 mem=G4   | <user> CHAT C1         -> WRITE G1     logp=-2.05
+t=  4 mem=G1   | <user> CHAT C2         -> WRITE G2     logp=-2.62
+t=  5 mem=G2   | <user> CHAT C3         -> WRITE G5     logp=-1.02
+t=  6 mem=G5   | <user> CHAT C1         -> WRITE G5     logp=-0.92
+t=  7 mem=G5   | <user> CHAT C3         -> WRITE G5     logp=-1.19
+t=  8 mem=G5   | <user> CHAT C0         -> ANSWER G7    logp=-2.36
+t=  9 mem=G5   | <user> CHAT C0         -> WRITE NONE   logp=-2.50
+t= 10 mem=NONE | <user> CHAT C0         -> WRITE G3     logp=-2.01
+t= 11 mem=G3   | <user> CHAT C3         -> WRITE G3     logp=-1.98
+t= 12 mem=G3   | <user> CHAT C2         -> WRITE G4     logp=-1.47
+t= 13 mem=G4   | <user> CHAT C3         -> WRITE G6     logp=-2.86
+t= 14 mem=G6   | <user> CHAT C3         -> WRITE G4     logp=-1.61
+t= 15 mem=G4   | <user> QUESTION NONE   -> ANSWER G2    logp=-0.60
+
+goal=G1 return=0 version=-1
+t=  0 mem=NONE | <user> START NONE      -> WRITE G5     logp=-1.48
+t=  1 mem=G5   | <user> CHAT C2         -> WRITE G3     logp=-2.24
+t=  2 mem=G3   | <mate> SAYS G1         -> WRITE G2     logp=-2.30
+t=  3 mem=G2   | <user> CHAT C1         -> WRITE G5     logp=-1.10
+t=  4 mem=G5   | <user> CHAT C2         -> WRITE G4     logp=-1.74
+t=  5 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-2.17
+t=  6 mem=G4   | <user> CHAT C3         -> WRITE G3     logp=-1.89
+t=  7 mem=G3   | <user> CHAT C0         -> WRITE G2     logp=-2.36
+t=  8 mem=G2   | <user> CHAT C0         -> ANSWER G7    logp=-2.37
+t=  9 mem=G2   | <user> CHAT C3         -> WRITE G5     logp=-0.98
+t= 10 mem=G5   | <user> CHAT C2         -> WRITE G5     logp=-0.98
+t= 11 mem=G5   | <user> CHAT C1         -> WRITE G3     logp=-2.01
+t= 12 mem=G3   | <user> CHAT C3         -> WRITE G3     logp=-2.34
+t= 13 mem=G3   | <user> CHAT C2         -> WRITE G4     logp=-2.15
+t= 14 mem=G4   | <user> CHAT C1         -> WRITE G5     logp=-0.97
+t= 15 mem=G5   | <user> QUESTION NONE   -> ANSWER G2    logp=-0.51
+
+goal=G4 return=0 version=-1
+t=  0 mem=NONE | <user> START NONE      -> WRITE G2     logp=-1.84
+t=  1 mem=G2   | <user> CHAT C1         -> WRITE G1     logp=-1.72
+t=  2 mem=G1   | <user> CHAT C0         -> WRITE G4     logp=-1.59
+t=  3 mem=G4   | <user> CHAT C0         -> WRITE G3     logp=-2.02
+t=  4 mem=G3   | <user> CHAT C0         -> WRITE G5     logp=-1.11
+t=  5 mem=G5   | <user> CHAT C3         -> WRITE G4     logp=-2.14
+t=  6 mem=G4   | <user> CHAT C3         -> WRITE G5     logp=-0.98
+t=  7 mem=G5   | <user> CHAT C2         -> WRITE G2     logp=-2.37
+t=  8 mem=G2   | <user> CHAT C0         -> ANSWER G1    logp=-0.33
+t=  9 mem=G2   | <user> CHAT C3         -> WRITE G3     logp=-2.03
+t= 10 mem=G3   | <user> CHAT C3         -> WRITE G4     logp=-2.01
+t= 11 mem=G4   | <user> CHAT C2         -> WRITE G5     logp=-0.88
+t= 12 mem=G5   | <user> CHAT C1         -> WRITE G6     logp=-3.86
+t= 13 mem=G6   | <user> CHAT C0         -> WRITE G1     logp=-1.74
+t= 14 mem=G1   | <user> CHAT C2         -> WRITE G5     logp=-0.99
+t= 15 mem=G5   | <user> QUESTION NONE   -> ANSWER G1    logp=-1.30
+
+goal=G5 return=0 version=-1
+t=  0 mem=NONE | <user> START NONE      -> WRITE G1     logp=-1.78
+t=  1 mem=G1   | <user> CHAT C3         -> WRITE G1     logp=-1.80
+t=  2 mem=G1   | <user> CHAT C1         -> WRITE G4     logp=-1.57
+t=  3 mem=G4   | <user> CHAT C0         -> WRITE G5     logp=-1.12
+t=  4 mem=G5   | <user> CHAT C1         -> WRITE G4     logp=-1.70
+t=  5 mem=G4   | <user> CHAT C1         -> WRITE G5     logp=-1.04
+t=  6 mem=G5   | <user> CHAT C0         -> WRITE G3     logp=-1.88
+t=  7 mem=G3   | <user> CHAT C2         -> WRITE G4     logp=-1.78
+t=  8 mem=G4   | <user> CHAT C0         -> ANSWER G1    logp=-0.48
+t=  9 mem=G4   | <user> CHAT C3         -> WRITE G5     logp=-1.00
+t= 10 mem=G5   | <user> CHAT C0         -> WRITE G5     logp=-1.00
+t= 11 mem=G5   | <user> CHAT C0         -> WRITE G5     logp=-0.87
+t= 12 mem=G5   | <user> CHAT C0         -> WRITE G5     logp=-1.50
+t= 13 mem=G5   | <user> CHAT C2         -> WRITE G5     logp=-1.21
+t= 14 mem=G5   | <user> CHAT C3         -> WRITE G2     logp=-2.80
+t= 15 mem=G2   | <user> QUESTION NONE   -> ANSWER G1    logp=-1.38
+
+goal=G5 return=0 version=-1
+t=  0 mem=NONE | <user> START NONE      -> WRITE G5     logp=-1.48
+t=  1 mem=G5   | <mate> SAYS G5         -> WRITE G1     logp=-1.73
+t=  2 mem=G1   | <user> CHAT C1         -> WRITE G5     logp=-0.97
+t=  3 mem=G5   | <mate> SAYS G5         -> WRITE G5     logp=-1.10
+t=  4 mem=G5   | <user> CHAT C2         -> WRITE G1     logp=-1.99
+t=  5 mem=G1   | <user> CHAT C1         -> WRITE G4     logp=-2.23
+t=  6 mem=G4   | <user> CHAT C0         -> WRITE G5     logp=-0.94
+t=  7 mem=G5   | <user> CHAT C3         -> WRITE G4     logp=-1.91
+t=  8 mem=G4   | <user> CHAT C1         -> ANSWER G1    logp=-0.42
+t=  9 mem=G4   | <user> CHAT C1         -> WRITE G5     logp=-0.97
+t= 10 mem=G5   | <user> CHAT C0         -> WRITE G5     logp=-0.98
+t= 11 mem=G5   | <user> CHAT C1         -> WRITE G1     logp=-2.49
+t= 12 mem=G1   | <user> CHAT C0         -> WRITE G1     logp=-1.85
+t= 13 mem=G1   | <user> CHAT C0         -> WRITE G2     logp=-2.42
+t= 14 mem=G2   | <user> CHAT C1         -> WRITE G1     logp=-2.11
+t= 15 mem=G1   | <user> QUESTION NONE   -> ANSWER G4    logp=-4.51
