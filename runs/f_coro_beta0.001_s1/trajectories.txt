@@ -1,0 +1,143 @@
+goal=G5 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> WRITE G4     logp=-0.05 r=-0.00
+t=  1 v=+0 mem=G4   | <mate> SAYS G5         -> WRITE G4     logp=-0.06 r=-0.00
+t=  2 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.11 r=-0.00
+t=  3 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.09 r=-0.00
+t=  4 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.08 r=-0.00
+t=  5 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G1     logp=-7.32 r=-0.00
+t=  6 v=+0 mem=G1   | <user> CHAT C0         -> WRITE G4     logp=-0.08 r=-0.00
+t=  7 v=+0 mem=G4   | <user> NOW G6          -> WRITE G4     logp=-0.07 r=-0.00
+t=  8 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.06 r=-0.00
+t=  9 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.08 r=-0.00
+t= 10 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.09 r=-0.00
+t= 11 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.06 r=-0.00
+t= 12 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.06 r=-0.00
+t= 13 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.08 r=-0.00
+t= 14 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.08 r=-0.00
+t= 15 v=+0 mem=G4   | <user> QUESTION NONE   -> WRITE G4     logp=-0.09 r=+0.00
+
+goal=G3 return=+1.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> WRITE G4     logp=-0.05 r=-0.00
+t=  1 v=+0 mem=G4   | <mate> SAYS G3         -> WRITE G4     logp=-0.28 r=-0.00
+t=  2 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.45 r=-0.00
+t=  3 v=+0 mem=G4   | <mate> SAYS G3         -> WRITE G4     logp=-0.38 r=-0.00
+t=  4 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.46 r=-0.00
+t=  5 v=+0 mem=G4   | <user> CHAT C0         -> PASS G4      logp=-1.00 r=-0.00
+t=  6 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.40 r=-0.00
+t=  7 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.35 r=-0.00
+t=  8 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G3     logp=-0.29 r=-0.00
+t=  9 v=+0 mem=G3   | <user> CHAT C0         -> LOOKUP G4    logp=-4.31 r=-0.00
+t= 10 v=+0 mem=G3   | <tool> ERROR NONE      -> PASS G4      logp=-0.93 r=-0.00
+t= 11 v=+0 mem=G3   | <user> CHAT C3         -> WRITE G4     logp=-0.35 r=-0.00
+t= 12 v=+0 mem=G4   | <user> CHAT C0         -> PASS G4      logp=-1.44 r=-0.00
+t= 13 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.42 r=-0.00
+t= 14 v=+0 mem=G4   | <user> CHAT C3         -> PASS G4      logp=-1.23 r=-0.00
+t= 15 v=+0 mem=G4   | <user> QUESTION NONE   -> PASS G3      logp=-0.94 r=+1.00
+
+goal=G6 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> WRITE G4     logp=-0.05 r=-0.00
+t=  1 v=+0 mem=G4   | <mate> SAYS G6         -> WRITE G4     logp=-0.06 r=-0.00
+t=  2 v=+0 mem=G4   | <mate> SAYS G6         -> WRITE G4     logp=-0.11 r=-0.00
+t=  3 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.09 r=-0.00
+t=  4 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.08 r=-0.00
+t=  5 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.07 r=-0.00
+t=  6 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.07 r=-0.00
+t=  7 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.06 r=-0.00
+t=  8 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.06 r=-0.00
+t=  9 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.07 r=-0.00
+t= 10 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.08 r=-0.00
+t= 11 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.06 r=-0.00
+t= 12 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.06 r=-0.00
+t= 13 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.07 r=-0.00
+t= 14 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G7     logp=-7.30 r=-0.00
+t= 15 v=+0 mem=G7   | <user> QUESTION NONE   -> WRITE G4     logp=-0.09 r=+0.00
+
+goal=G1 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> WRITE G4     logp=-0.05 r=-0.00
+t=  1 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.06 r=-0.00
+t=  2 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.11 r=-0.00
+t=  3 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.09 r=-0.00
+t=  4 v=+0 mem=G4   | <user> NOW G7          -> WRITE G4     logp=-0.08 r=-0.00
+t=  5 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.07 r=-0.00
+t=  6 v=+0 mem=G4   | <user> CHAT C1         -> PASS G4      logp=-3.07 r=-0.00
+t=  7 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.07 r=-0.00
+t=  8 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.06 r=-0.00
+t=  9 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.08 r=-0.00
+t= 10 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.08 r=-0.00
+t= 11 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.06 r=-0.00
+t= 12 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.06 r=-0.00
+t= 13 v=+0 mem=G4   | <user> CHAT C0         -> PASS G4      logp=-3.03 r=-0.00
+t= 14 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.08 r=-0.00
+t= 15 v=+0 mem=G4   | <user> QUESTION NONE   -> WRITE G4     logp=-0.09 r=+0.00
+
+goal=G1 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> WRITE G4     logp=-0.05 r=-0.00
+t=  1 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.06 r=-0.00
+t=  2 v=+0 mem=G4   | <mate> SAYS G1         -> WRITE G4     logp=-0.10 r=-0.00
+t=  3 v=+0 mem=G4   | <mate> SAYS G1         -> WRITE G4     logp=-0.08 r=-0.00
+t=  4 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.08 r=-0.00
+t=  5 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.07 r=-0.00
+t=  6 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.07 r=-0.00
+t=  7 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.06 r=-0.00
+t=  8 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.06 r=-0.00
+t=  9 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G5     logp=-4.85 r=-0.00
+t= 10 v=+0 mem=G5   | <user> CHAT C0         -> WRITE G4     logp=-0.08 r=-0.00
+t= 11 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.06 r=-0.00
+t= 12 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.06 r=-0.00
+t= 13 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G7     logp=-7.49 r=-0.00
+t= 14 v=+0 mem=G7   | <user> CHAT C2         -> WRITE G4     logp=-0.08 r=-0.00
+t= 15 v=+0 mem=G4   | <user> QUESTION NONE   -> WRITE G4     logp=-0.08 r=+0.00
+
+goal=G4 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> WRITE G4     logp=-0.05 r=-0.00
+t=  1 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.06 r=-0.00
+t=  2 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.11 r=-0.00
+t=  3 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.09 r=-0.00
+t=  4 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.08 r=-0.00
+t=  5 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.07 r=-0.00
+t=  6 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.07 r=-0.00
+t=  7 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.07 r=-0.00
+t=  8 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.06 r=-0.00
+t=  9 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.08 r=-0.00
+t= 10 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.08 r=-0.00
+t= 11 v=+0 mem=G4   | <user> NOW G2          -> WRITE G4     logp=-0.06 r=-0.00
+t= 12 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.06 r=-0.00
+t= 13 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.07 r=-0.00
+t= 14 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.08 r=-0.00
+t= 15 v=+0 mem=G4   | <user> QUESTION NONE   -> WRITE G4     logp=-0.08 r=+0.00
+
+goal=G5 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> WRITE G4     logp=-0.05 r=-0.00
+t=  1 v=+0 mem=G4   | <mate> SAYS G5         -> WRITE G4     logp=-0.06 r=-0.00
+t=  2 v=+0 mem=G4   | <mate> SAYS G5         -> WRITE G4     logp=-0.11 r=-0.00
+t=  3 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.09 r=-0.00
+t=  4 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.08 r=-0.00
+t=  5 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.07 r=-0.00
+t=  6 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.07 r=-0.00
+t=  7 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.07 r=-0.00
+t=  8 v=+0 mem=G4   | <user> CHAT C0         -> LOOKUP G4    logp=-5.26 r=-0.00
+t=  9 v=+0 mem=G4   | <user> NOW G0          -> WRITE G4     logp=-0.10 r=-0.00
+t= 10 v=+0 mem=G4   | <user> CHAT C3         -> PASS G4      logp=-2.57 r=-0.00
+t= 11 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.07 r=-0.00
+t= 12 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.07 r=-0.00
+t= 13 v=+0 mem=G4   | <user> CHAT C1         -> PASS G4      logp=-2.74 r=-0.00
+t= 14 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.10 r=-0.00
+t= 15 v=+0 mem=G4   | <user> QUESTION NONE   -> WRITE G4     logp=-0.11 r=+0.00
+
+goal=G5 return=+0.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> WRITE G4     logp=-0.05 r=-0.00
+t=  1 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.06 r=-0.00
+t=  2 v=+0 mem=G4   | <user> CHAT C0         -> PASS G4      logp=-2.57 r=-0.00
+t=  3 v=+0 mem=G4   | <mate> SAYS G5         -> WRITE G4     logp=-0.08 r=-0.00
+t=  4 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.11 r=-0.00
+t=  5 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.10 r=-0.00
+t=  6 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.10 r=-0.00
+t=  7 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.09 r=-0.00
+t=  8 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.08 r=-0.00
+t=  9 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.11 r=-0.00
+t= 10 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.12 r=-0.00
+t= 11 v=+0 mem=G4   | <user> CHAT C0         -> WRITE G4     logp=-0.08 r=-0.00
+t= 12 v=+0 mem=G4   | <user> CHAT C2         -> WRITE G4     logp=-0.08 r=-0.00
+t= 13 v=+0 mem=G4   | <user> CHAT C3         -> WRITE G4     logp=-0.10 r=-0.00
+t= 14 v=+0 mem=G4   | <user> CHAT C1         -> WRITE G4     logp=-0.11 r=-0.00
+t= 15 v=+0 mem=G4   | <user> QUESTION NONE   -> WRITE G4     logp=-0.12 r=+0.00

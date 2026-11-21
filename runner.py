@@ -13,7 +13,7 @@ import hashlib
 import json
 import time
 from collections import deque
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, fields, replace
 from pathlib import Path
 
 import numpy as np
@@ -49,7 +49,8 @@ class Config:
     drift_per_turn: bool = False  # one multiplier per staleness bucket instead of one for the batch
     beta_lr: float = 1.0
     turn_penalty_lr: float = 0.0  # > 0: keep beta global, add a separate KL penalty per staleness bucket (E7)
-    branch: int = 4  # objective=tree: continuations per trunk; group_size is then trunks per seed
+    beta_path: str = ""  # control: replay the scalar beta of runs/<beta_path> per iteration instead of dual ascent
+    branch: int = 4  # objective=tree/tree_flat: continuations per trunk; group_size is then trunks per seed
     groups: int = 32
     group_size: int = 8
     iters: int = 300
@@ -170,10 +171,15 @@ def render(ro, i, adv=None):
     return "\n".join(lines)
 
 
+TRAINING_CODE = ("credit.py", "env.py", "offpolicy.py", "policy.py", "runner.py", "traj.py")
+
+
 def src_hash():
+    """Hash of the code that can change a run. (Before the controls it hashed every .py, analysis scripts
+    included, so it changed between stages even when training code did not.)"""
     h = hashlib.sha256()
-    for p in sorted(HERE.glob("*.py")):
-        h.update(p.read_bytes())
+    for name in TRAINING_CODE:
+        h.update((HERE / name).read_bytes())
     return h.hexdigest()[:12]
 
 
@@ -188,6 +194,10 @@ def train(cfg, log=True):
     beta = np.full(max_staleness(cfg) + 1, cfg.beta)  # beta[s] weights turns that are s updates stale
     assert cfg.turn_penalty_lr == 0 or cfg.drift_budget > 0, "the per-turn penalty needs a drift budget"
     lam = np.zeros(max_staleness(cfg) + 1)  # lam[s]: KL-penalty multiplier for turns s updates stale
+    beta_path = None
+    if cfg.beta_path:
+        beta_path = [json.loads(x)["beta"] for x in open(HERE / cfg.out / cfg.beta_path / "metrics.jsonl")]
+        assert len(beta_path) >= cfg.iters and not cfg.drift_per_turn
 
     run_dir = None
     if log:
@@ -207,7 +217,9 @@ def train(cfg, log=True):
             past.append(copy.deepcopy(model))
             stal = np.minimum(staleness(cfg, rng, B), len(past) - 1)  # early on, the oldest weights we have
             policy_for = lambda s: past[-1 - s]  # noqa: E731
-        tree = cfg.objective == "tree"
+        if beta_path:
+            beta[:] = beta_path[it]
+        tree = cfg.objective in ("tree", "tree_flat")  # tree_flat: same forked data, plain CORO over all leaves of a seed
         branch = (int(rng.integers(1, H)), cfg.branch) if tree else (0, 1)  # branch turn drawn per batch
         ro = rollout(policy_for, cfg, goals, rng, gen, stal, branch)
         ro.version = it + ro.version
@@ -218,12 +230,13 @@ def train(cfg, log=True):
         w = torch.as_tensor(beta[stal_turn], dtype=torch.float32, device=dev)
         lam_w = torch.as_tensor(lam[stal_turn], dtype=torch.float32, device=dev)
         pen = (lambda lp: turn_kl_penalty(lp, beh, lam_w)) if cfg.turn_penalty_lr > 0 else (lambda lp: 0.0)
-        if tree:
+        if cfg.objective == "tree":
             rew = torch.as_tensor(ro.reward, device=dev)
             lossv, logp = backward_two_pass(model, ro, lambda lp: tree_loss(cfg, lp, beh, rew, branch, w) + pen(lp))
         else:
             ret = torch.as_tensor(ro.ret, device=dev)
-            lossv, logp = backward_two_pass(model, ro, lambda lp: loss(cfg, lp, beh, adv, ret, w) + pen(lp))
+            lcfg = replace(cfg, objective="coro", group_size=cfg.group_size * branch[1]) if tree else cfg
+            lossv, logp = backward_two_pass(model, ro, lambda lp: loss(lcfg, lp, beh, adv, ret, w) + pen(lp))
         gn = nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         opt.step()
         opt.zero_grad()
@@ -248,7 +261,7 @@ def train(cfg, log=True):
             if cfg.drift_per_turn:
                 for s in np.unique(stal_turn):
                     beta[s] = max(1e-3, beta[s] + cfg.beta_lr * (kl_turn[stal_turn == s].mean() - cfg.drift_budget))
-            else:
+            elif not beta_path:
                 beta[:] = max(1e-3, beta[0] + cfg.beta_lr * (m["kl_k3"] - cfg.drift_budget))
         if it % cfg.eval_every == 0 or it == cfg.iters - 1:
             ev = evaluate(model, cfg)

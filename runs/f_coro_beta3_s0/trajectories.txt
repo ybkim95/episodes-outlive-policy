@@ -1,0 +1,143 @@
+goal=G5 return=+0.97
+t=  0 v=+0 mem=NONE | <user> START NONE      -> ASK G1       logp=-4.68 r=-0.01
+t=  1 v=+0 mem=NONE | <user> IS G5           -> LOOKUP NONE  logp=-3.01 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G3    logp=-2.98 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP NONE  logp=-2.46 r=-0.00
+t=  4 v=+0 mem=NONE | <tool> ERROR NONE      -> WRITE G0     logp=-4.56 r=-0.00
+t=  5 v=+0 mem=G0   | <user> CHAT C1         -> LOOKUP G1    logp=-3.66 r=-0.00
+t=  6 v=+0 mem=G0   | <tool> ERROR NONE      -> LOOKUP G7    logp=-2.82 r=-0.00
+t=  7 v=+0 mem=G0   | <user> NOW G6          -> LOOKUP G4    logp=-2.37 r=-0.00
+t=  8 v=+0 mem=G0   | <tool> ERROR NONE      -> ASK G6       logp=-3.78 r=-0.01
+t=  9 v=+0 mem=G0   | <user> UNKNOWN NONE    -> WRITE G4     logp=-4.07 r=-0.00
+t= 10 v=+0 mem=G4   | <user> CHAT C2         -> ASK G5       logp=-4.78 r=-0.01
+t= 11 v=+0 mem=G4   | <user> UNKNOWN NONE    -> PASS G1      logp=-3.26 r=-0.00
+t= 12 v=+0 mem=G4   | <user> CHAT C1         -> LOOKUP G7    logp=-1.95 r=-0.00
+t= 13 v=+0 mem=G4   | <tool> ERROR NONE      -> PASS G5      logp=-3.34 r=-0.00
+t= 14 v=+0 mem=G4   | <user> CHAT C0         -> PASS G1      logp=-2.04 r=-0.00
+t= 15 v=+0 mem=G4   | <user> QUESTION NONE   -> WRITE G6     logp=-0.77 r=+1.00
+
+goal=G3 return=+1.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G7    logp=-2.74 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G3       -> LOOKUP G4    logp=-2.83 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G3       -> PASS NONE    logp=-4.09 r=-0.00
+t=  3 v=+0 mem=NONE | <mate> SAYS G3         -> LOOKUP G6    logp=-2.34 r=-0.00
+t=  4 v=+0 mem=NONE | <tool> ERROR NONE      -> WRITE G7     logp=-4.35 r=-0.00
+t=  5 v=+0 mem=G7   | <user> CHAT C0         -> LOOKUP G5    logp=-2.66 r=-0.00
+t=  6 v=+0 mem=G7   | <tool> ERROR NONE      -> LOOKUP NONE  logp=-3.17 r=-0.00
+t=  7 v=+0 mem=G7   | <tool> ERROR NONE      -> WRITE G3     logp=-3.60 r=-0.00
+t=  8 v=+0 mem=G3   | <user> CHAT C2         -> LOOKUP G7    logp=-3.06 r=-0.00
+t=  9 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G6    logp=-2.84 r=-0.00
+t= 10 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G0    logp=-2.68 r=-0.00
+t= 11 v=+0 mem=G3   | <tool> ERROR NONE      -> PASS NONE    logp=-3.23 r=-0.00
+t= 12 v=+0 mem=G3   | <user> CHAT C0         -> PASS G3      logp=-4.85 r=-0.00
+t= 13 v=+0 mem=G3   | <user> CHAT C0         -> WRITE NONE   logp=-3.61 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C3         -> PASS G5      logp=-3.89 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> WRITE G3     logp=-0.76 r=+1.00
+
+goal=G6 return=+0.95
+t=  0 v=+0 mem=NONE | <user> START NONE      -> ANSWER G5    logp=-6.07 r=-0.01
+t=  1 v=+0 mem=NONE | <mate> SAYS G6         -> ANSWER G3    logp=-4.45 r=-0.01
+t=  2 v=+0 mem=NONE | <mate> SAYS G6         -> LOOKUP G4    logp=-3.16 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G6       -> PASS G6      logp=-3.40 r=-0.00
+t=  4 v=+0 mem=NONE | <user> CHAT C3         -> PASS G1      logp=-3.41 r=-0.00
+t=  5 v=+0 mem=NONE | <user> CHAT C3         -> WRITE G3     logp=-4.88 r=-0.00
+t=  6 v=+0 mem=G3   | <user> CHAT C2         -> LOOKUP NONE  logp=-3.18 r=-0.00
+t=  7 v=+0 mem=G3   | <tool> ERROR NONE      -> PASS G6      logp=-4.11 r=-0.00
+t=  8 v=+0 mem=G3   | <user> CHAT C1         -> ASK G6       logp=-3.82 r=-0.01
+t=  9 v=+0 mem=G3   | <user> UNKNOWN NONE    -> ANSWER G3    logp=-4.59 r=-0.01
+t= 10 v=+0 mem=G3   | <user> CHAT C3         -> ASK G7       logp=-5.40 r=-0.01
+t= 11 v=+0 mem=G3   | <user> UNKNOWN NONE    -> LOOKUP G0    logp=-2.71 r=-0.00
+t= 12 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G2    logp=-3.21 r=-0.00
+t= 13 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G3    logp=-4.93 r=-0.00
+t= 14 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G7    logp=-2.95 r=-0.00
+t= 15 v=+0 mem=G3   | <user> QUESTION NONE   -> WRITE G6     logp=-0.83 r=+1.00
+
+goal=G1 return=+0.99
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G1    logp=-2.86 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G1       -> PASS G1      logp=-3.18 r=-0.00
+t=  2 v=+0 mem=NONE | <user> CHAT C1         -> LOOKUP G2    logp=-2.82 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G1       -> PASS G7      logp=-3.25 r=-0.00
+t=  4 v=+0 mem=NONE | <user> NOW G7          -> WRITE G1     logp=-3.52 r=-0.00
+t=  5 v=+0 mem=G1   | <user> CHAT C3         -> LOOKUP G7    logp=-2.80 r=-0.00
+t=  6 v=+0 mem=G1   | <tool> ERROR NONE      -> PASS G1      logp=-2.11 r=-0.00
+t=  7 v=+0 mem=G1   | <user> CHAT C1         -> LOOKUP G1    logp=-2.51 r=-0.00
+t=  8 v=+0 mem=G1   | <tool> ERROR NONE      -> LOOKUP G6    logp=-2.62 r=-0.00
+t=  9 v=+0 mem=G1   | <tool> ERROR NONE      -> LOOKUP G4    logp=-2.99 r=-0.00
+t= 10 v=+0 mem=G1   | <tool> ERROR NONE      -> PASS G2      logp=-4.25 r=-0.00
+t= 11 v=+0 mem=G1   | <user> CHAT C1         -> PASS NONE    logp=-3.15 r=-0.00
+t= 12 v=+0 mem=G1   | <user> CHAT C2         -> WRITE G7     logp=-3.09 r=-0.00
+t= 13 v=+0 mem=G7   | <user> CHAT C0         -> PASS G2      logp=-4.05 r=-0.00
+t= 14 v=+0 mem=G7   | <user> CHAT C2         -> ANSWER G3    logp=-5.45 r=-0.01
+t= 15 v=+0 mem=G7   | <user> QUESTION NONE   -> LOOKUP G7    logp=-2.40 r=+1.00
+
+goal=G1 return=+0.97
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G0    logp=-2.26 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G1       -> ANSWER G3    logp=-4.59 r=-0.01
+t=  2 v=+0 mem=NONE | <mate> SAYS G1         -> WRITE G6     logp=-3.64 r=-0.00
+t=  3 v=+0 mem=G6   | <mate> SAYS G1         -> PASS G6      logp=-2.95 r=-0.00
+t=  4 v=+0 mem=G6   | <user> CHAT C0         -> ASK G1       logp=-4.13 r=-0.01
+t=  5 v=+0 mem=G6   | <user> UNKNOWN NONE    -> ASK NONE     logp=-4.50 r=-0.01
+t=  6 v=+0 mem=G6   | <user> UNKNOWN NONE    -> LOOKUP G7    logp=-2.93 r=-0.00
+t=  7 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G1    logp=-2.83 r=-0.00
+t=  8 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G2    logp=-3.65 r=-0.00
+t=  9 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G5    logp=-3.24 r=-0.00
+t= 10 v=+0 mem=G6   | <tool> ERROR NONE      -> WRITE G1     logp=-2.90 r=-0.00
+t= 11 v=+0 mem=G1   | <user> CHAT C2         -> PASS G7      logp=-2.39 r=-0.00
+t= 12 v=+0 mem=G1   | <user> CHAT C1         -> WRITE G6     logp=-3.38 r=-0.00
+t= 13 v=+0 mem=G6   | <user> CHAT C0         -> LOOKUP G7    logp=-3.49 r=-0.00
+t= 14 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G6    logp=-2.23 r=-0.00
+t= 15 v=+0 mem=G6   | <user> QUESTION NONE   -> WRITE G1     logp=-0.78 r=+1.00
+
+goal=G4 return=+0.97
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G2    logp=-3.63 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G4       -> WRITE G5     logp=-4.58 r=-0.00
+t=  2 v=+0 mem=G5   | <user> CHAT C1         -> LOOKUP G2    logp=-2.96 r=-0.00
+t=  3 v=+0 mem=G5   | <tool> RESULT G4       -> WRITE G6     logp=-3.45 r=-0.00
+t=  4 v=+0 mem=G6   | <user> CHAT C0         -> WRITE NONE   logp=-5.31 r=-0.00
+t=  5 v=+0 mem=NONE | <user> CHAT C0         -> LOOKUP G2    logp=-2.33 r=-0.00
+t=  6 v=+0 mem=NONE | <tool> ERROR NONE      -> PASS G2      logp=-2.88 r=-0.00
+t=  7 v=+0 mem=NONE | <user> CHAT C1         -> PASS G7      logp=-3.39 r=-0.00
+t=  8 v=+0 mem=NONE | <user> CHAT C0         -> LOOKUP G5    logp=-2.57 r=-0.00
+t=  9 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G2    logp=-3.79 r=-0.00
+t= 10 v=+0 mem=NONE | <tool> ERROR NONE      -> ASK G4       logp=-4.78 r=-0.01
+t= 11 v=+0 mem=NONE | <user> NOW G2          -> PASS G1      logp=-3.04 r=-0.00
+t= 12 v=+0 mem=NONE | <user> CHAT C3         -> LOOKUP G0    logp=-3.34 r=-0.00
+t= 13 v=+0 mem=NONE | <tool> ERROR NONE      -> ASK G4       logp=-5.70 r=-0.01
+t= 14 v=+0 mem=NONE | <user> UNKNOWN NONE    -> ANSWER G6    logp=-5.56 r=-0.01
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> WRITE G2     logp=-0.85 r=+1.00
+
+goal=G5 return=+1.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G7    logp=-2.74 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G7    logp=-1.95 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G3    logp=-2.89 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G6    logp=-2.44 r=-0.00
+t=  4 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP NONE  logp=-3.05 r=-0.00
+t=  5 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP NONE  logp=-3.26 r=-0.00
+t=  6 v=+0 mem=NONE | <tool> ERROR NONE      -> WRITE G2     logp=-4.27 r=-0.00
+t=  7 v=+0 mem=G2   | <user> CHAT C3         -> PASS G1      logp=-3.24 r=-0.00
+t=  8 v=+0 mem=G2   | <user> CHAT C0         -> LOOKUP G6    logp=-2.67 r=-0.00
+t=  9 v=+0 mem=G2   | <user> NOW G0          -> LOOKUP G7    logp=-1.99 r=-0.00
+t= 10 v=+0 mem=G2   | <tool> ERROR NONE      -> PASS G4      logp=-3.83 r=-0.00
+t= 11 v=+0 mem=G2   | <user> CHAT C0         -> PASS G6      logp=-3.05 r=-0.00
+t= 12 v=+0 mem=G2   | <user> CHAT C0         -> WRITE G3     logp=-4.57 r=-0.00
+t= 13 v=+0 mem=G3   | <user> CHAT C1         -> PASS G1      logp=-3.81 r=-0.00
+t= 14 v=+0 mem=G3   | <user> CHAT C0         -> LOOKUP G2    logp=-2.84 r=-0.00
+t= 15 v=+0 mem=G3   | <user> QUESTION NONE   -> WRITE G0     logp=-0.77 r=+1.00
+
+goal=G5 return=+0.99
+t=  0 v=+0 mem=NONE | <user> START NONE      -> WRITE G4     logp=-3.76 r=-0.00
+t=  1 v=+0 mem=G4   | <user> CHAT C2         -> LOOKUP NONE  logp=-2.90 r=-0.00
+t=  2 v=+0 mem=G4   | <tool> RESULT G5       -> LOOKUP G5    logp=-2.90 r=-0.00
+t=  3 v=+0 mem=G4   | <tool> RESULT G5       -> PASS G3      logp=-5.92 r=-0.00
+t=  4 v=+0 mem=G4   | <user> CHAT C1         -> LOOKUP G4    logp=-2.15 r=-0.00
+t=  5 v=+0 mem=G4   | <tool> ERROR NONE      -> LOOKUP G0    logp=-2.06 r=-0.00
+t=  6 v=+0 mem=G4   | <tool> ERROR NONE      -> PASS G0      logp=-3.96 r=-0.00
+t=  7 v=+0 mem=G4   | <user> CHAT C2         -> PASS G5      logp=-2.95 r=-0.00
+t=  8 v=+0 mem=G4   | <user> CHAT C0         -> LOOKUP G0    logp=-1.85 r=-0.00
+t=  9 v=+0 mem=G4   | <tool> ERROR NONE      -> ANSWER G1    logp=-5.39 r=-0.01
+t= 10 v=+0 mem=G4   | <user> CHAT C3         -> PASS G0      logp=-3.77 r=-0.00
+t= 11 v=+0 mem=G4   | <user> CHAT C0         -> PASS G0      logp=-2.65 r=-0.00
+t= 12 v=+0 mem=G4   | <user> CHAT C2         -> LOOKUP G1    logp=-2.95 r=-0.00
+t= 13 v=+0 mem=G4   | <tool> ERROR NONE      -> WRITE NONE   logp=-3.67 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C1         -> PASS G0      logp=-2.96 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> WRITE G5     logp=-0.80 r=+1.00

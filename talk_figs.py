@@ -8,7 +8,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
-from analyze import E7_LRS, HERE, evals, final_goal, load, read, select_e7  # noqa: E402
+from analyze import HERE, evals, final_goal, load, read  # noqa: E402
 from runner import Config, staleness  # noqa: E402
 
 plt.rcParams.update({"font.size": 18, "axes.spines.top": False, "axes.spines.right": False,
@@ -79,26 +79,69 @@ def fig_severity():
     save(fig, "talk_severity.png")
 
 
+def by_update(names):
+    rows = [read(n) for n in names]
+    it = [r["iter"] + 1 for r in rows[0] if "eval_goal" in r]
+    ys = [evals(r)[1] for r in rows]
+    n = min(len(y) for y in ys)
+    return np.array(it[:n]), np.mean([y[:n] for y in ys], 0), [y[:n] for y in ys]
+
+
+def fig_controls():
+    """Per update: more episodes (C2), the same forked data with a flat loss (C1), the two-level loss (E5)."""
+    fig, ax = plt.subplots(figsize=(11, 6.2))
+    spec = [("r_E4_coro_budget", "CORO, 256 episodes / update", GREY, 2.5), ("c_coro416", "CORO, 416 episodes / update", NAVY, 2.5),
+            ("c_tree_flat", "forked data (416 leaves), flat CORO", BLUE, 2.5), ("r_E5_tree_budget", "forked data, Branched CORO", ORANGE, 4)]
+    for pre, lab, col, lw in spec:
+        x, m, ys = by_update([f"{pre}_s{s}" for s in (0, 1, 2)])
+        for y in ys:
+            ax.plot(x, y, color=col, alpha=0.18, lw=1)
+        ax.plot(x, m, color=col, lw=lw, label=lab)
+    ax.axhline(0.9, color="#3D4757", lw=1, ls=":")
+    ax.set(xlabel="trainer updates", ylabel="held-out goal rate", ylim=(0, 1.03), xlim=(0, 800))
+    ax.legend(fontsize=15, loc="lower right", frameon=False)
+    save(fig, "talk_controls.png")
+
+
 def fig_turn_budget(runs):
-    sel = select_e7()
+    """Per-turn budgets against Branched CORO, and why the KL-penalty version fails: its global beta reaches
+    the floor while it is still learning. Replaying Branched CORO's beta path fixes it."""
     fig, axs = plt.subplots(1, 2, figsize=(12.5, 6.6))
-    curves = [("E5: no per-turn control", list(runs["E5_tree_budget"].values()), ORANGE, 4),
-              ("E6: per-turn β", list(runs["E6_tree_turnbudget"].values()), PURPLE, 2.5)]
-    curves += [(f"E7 ({lr})", [read(f"e7_lr{lr}_s{s}") for s in (0, 1, 2)], c, 2.5)
-               for lr, c in zip(E7_LRS, (GOLD, "#8C6D1F", "#5E4A14"))]
-    for lab, rows, col, lw in curves:
-        x, m, _ = mean_curve(rows)
-        axs[0].plot(x, m, color=col, lw=lw, label=lab)
-    axs[0].set(xlabel="agent turns (millions)", ylabel="held-out goal rate", ylim=(0, 1.03))
-    axs[0].legend(fontsize=15, loc="upper left", bbox_to_anchor=(-0.1, -0.17), ncol=2, frameon=False)
-    kl = np.array([[np.nan if x is None else x for x in r["kl_by_stal"]] for r in read(f"e7_lr{sel}_s0")])
-    early = np.nanmean(kl[:100], 0) * 1e3
-    axs[1].bar(range(len(early)), early, color=NAVY)
-    axs[1].set_xticks(range(0, len(early), 2))
-    axs[1].axhline(2, color=ORANGE, lw=3, ls="--")
-    axs[1].text(len(early) - 0.5, 2.08, "budget δ", ha="right", va="bottom", color=ORANGE, fontsize=16)
-    axs[1].set(xlabel="staleness of the turn", ylabel="per-token KL ×10⁻³")
+    curves = [("Branched CORO + budget", "r_E5_tree_budget", ORANGE, "-", 4),
+              ("+ per-turn β", "m_E6_tree_turnbudget", PURPLE, "-", 2.5),
+              ("+ per-turn KL penalty", "e7_lr100", GOLD, "-", 3),
+              ("+ per-turn KL penalty, β path of\n   Branched CORO replayed", "c_e7_betaE5", "#5E4A14", "--", 2.5)]
+    for lab, pre, col, ls, lw in curves:
+        x, m, _ = by_update([f"{pre}_s{s}" for s in (0, 1, 2)])
+        axs[0].plot(x, m, color=col, ls=ls, lw=lw, label=lab)
+    axs[0].set(xlabel="trainer updates", ylabel="held-out goal rate", ylim=(0, 1.03))
+    axs[0].legend(fontsize=14, loc="upper left", bbox_to_anchor=(-0.1, -0.17), ncol=2, frameon=False)
+    for lab, pre, col in (("Branched CORO + budget", "m_E5_tree_budget", ORANGE), ("+ per-turn KL penalty", "e7_lr100", GOLD)):
+        b = np.mean([[r["beta"] for r in read(f"{pre}_s{s}")] for s in (0, 1, 2)], 0)
+        axs[1].plot(np.arange(1, len(b) + 1), b, color=col, lw=3, label=lab)
+    axs[1].axhline(1e-3, color="#3D4757", lw=1, ls=":")
+    axs[1].text(1000, 1.15e-3, "floor", ha="right", va="bottom", fontsize=15, color="#3D4757")
+    axs[1].set(xlabel="trainer updates", ylabel="global β (drift-budget dual)", yscale="log")
+    axs[1].legend(fontsize=14, frameon=False)
     save(fig, "talk_turn_budget.png")
+
+
+def fig_beta_sweep():
+    """Fixed beta from the first update, no drift budget: too small never learns, too large is slow."""
+    from analyze import BETA_SWEEP, first_at
+    fig, ax = plt.subplots(figsize=(11, 6.2))
+    for (obj, runs), col, off in zip(BETA_SWEEP.items(), (BLUE, ORANGE), (0.93, 1.08)):
+        bs, means = sorted(runs), []
+        for b in bs:
+            its = [first_at(read(f"{runs[b]}_s{s}"), "iter") or 1000 for s in (0, 1, 2)]
+            ax.scatter([b * off] * 3, its, color=col, s=40, alpha=0.45)
+            means.append(np.mean(its))
+        ax.plot(bs, means, color=col, lw=4 if obj.startswith("Branched") else 2.5, marker="o", ms=10, label=obj)
+    ax.axhline(1000, color="#3D4757", lw=1, ls=":")
+    ax.text(1.6e-3, 985, "never reached 0.9", fontsize=15, color="#3D4757", va="top")
+    ax.set(xscale="log", xlabel="β, fixed from the first update", ylabel="updates to reach 0.9", ylim=(250, 1040))
+    ax.legend(fontsize=15, loc="lower left", frameon=False)
+    save(fig, "talk_beta_sweep.png")
 
 
 def fig_branch():
@@ -129,4 +172,6 @@ if __name__ == "__main__":
     fig_main(r)
     fig_severity()
     fig_turn_budget(r)
+    fig_controls()
+    fig_beta_sweep()
     fig_branch()

@@ -146,6 +146,33 @@ def test_tree_reduces_to_coro_at_root():
     assert torch.allclose(*grads, atol=1e-6)
 
 
+def test_tree_levels_split_credit():
+    # b > 0: level 1 is CORO over trunks (one shared prefix each) on prefix reward + mean continuation
+    # return; level 2 is CORO over siblings on their suffix only, so earlier rewards never reach suffix turns
+    from offpolicy import tree_loss
+    G1, k, b, H, beta = 4, 3, 2, 5, 0.5
+    tr = lambda x: x.view(-1, G1, k, *x.shape[1:])  # noqa: E731
+
+    def fork(x):  # siblings share the first b turns, as in a real fork
+        x = tr(x.clone())
+        x[:, :, 1:, :b] = x[:, :, :1, :b]
+        return x.view(-1, *x.shape[3:])
+
+    logp, beh, _ = random_batch(G=G1 * k, n=2, H=H)
+    logp, beh, rew = map(fork, (logp, beh, torch.rand(len(logp), H, generator=torch.Generator().manual_seed(1))))
+    lp = logp.clone().requires_grad_()
+    tree_loss(small_cfg(group_size=G1), lp, beh, rew, (b, k), beta).backward()
+    g = tr(lp.grad)
+    lp1 = tr(logp)[:, :, 0, :b].clone().requires_grad_()
+    r1 = tr(rew)[:, :, 0, :b].sum(-1) + tr(rew[:, b:].sum(1)).mean(2)
+    loss(small_cfg(objective="coro", group_size=G1), lp1.reshape(-1, b, 2), tr(beh)[:, :, 0, :b].reshape(-1, b, 2),
+         None, r1.reshape(-1), beta).backward()
+    assert torch.allclose(g[:, :, 0, :b], lp1.grad, atol=1e-6) and (g[:, :, 1:, :b] == 0).all()
+    lp2 = logp[:, b:].clone().requires_grad_()
+    (G1 * loss(small_cfg(objective="coro", group_size=k), lp2, beh[:, b:], None, rew[:, b:].sum(1), beta)).backward()
+    assert torch.allclose(lp.grad[:, b:], lp2.grad, atol=1e-6)
+
+
 def test_two_pass_backward_is_exact():
     from offpolicy import tree_loss
     from runner import backward_two_pass
@@ -192,6 +219,30 @@ def test_turn_penalty_off_is_e5():
         assert torch.equal(x, y)
     _, m = train(small_cfg(objective="tree", group_size=2, U=3, qmax=2, drift_budget=1e-6, turn_penalty_lr=1e3), log=False)
     assert max(max(r["lam_by_stal"]) for r in m) > 0  # multipliers move once drift exceeds the budget
+
+
+def test_scalar_dual_ascent_step():
+    _, m = train(small_cfg(objective="coro", U=3, qmax=2, drift_budget=0.05, beta_lr=2.0), log=False)
+    for a, b in zip(m, m[1:]):
+        assert math.isclose(b["beta"], max(1e-3, a["beta"] + 2.0 * (a["kl_k3"] - 0.05)), rel_tol=1e-9)
+
+
+def test_beta_path_replays_a_run(tmp_path):
+    # control for E7: replaying a run's own beta path must reproduce that run exactly
+    kw = dict(objective="tree", group_size=2, U=3, qmax=2, drift_budget=1e-4, beta_lr=5.0, out=str(tmp_path))
+    a, ma = train(small_cfg(name="a", **kw))
+    b, mb = train(small_cfg(name="b", beta_path="a", **kw))
+    assert [r["beta"] for r in ma] == [r["beta"] for r in mb] and len({r["beta"] for r in ma}) > 1
+    assert all(torch.equal(x, y) for x, y in zip(a.state_dict().values(), b.state_dict().values()))
+
+
+def test_tree_flat_sees_the_same_data():
+    # control for E5: same forked rollouts as tree, only the loss differs (plain CORO per seed)
+    kw = dict(group_size=2, branch=3, iters=1, U=3, qmax=2)
+    (a, ma), (b, mb) = (train(small_cfg(objective=o, **kw), log=False) for o in ("tree", "tree_flat"))
+    keys = ("env_steps", "branch_turn", "train_return", "kl_k3")
+    assert [ma[0][x] for x in keys] == [mb[0][x] for x in keys]
+    assert any(not torch.equal(x, y) for x, y in zip(a.state_dict().values(), b.state_dict().values()))
 
 
 # 6. env bounds: scripted policies that only read their context
