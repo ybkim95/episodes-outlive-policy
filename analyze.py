@@ -186,6 +186,9 @@ CONTROLS = [  # (label, run prefix); every run is seeds 0-2 at 1000 updates; see
     ("C4 E5 with E7's beta path", "c_e5_betaE7"),
     ("E0 sync CORO", "m_E0_coro_sync"),
     ("C5 sync policy gradient (= sync PPO)", "c_sync_none"),
+    ("M1 E5, level 2 only", "k_tree_lvl2"),  # scripts/mechanism.sh
+    ("M2 E5, siblings redraw the pending goal change", "k_tree_resample"),
+    ("M3 E4, each group shares one goal-change schedule", "k_coro_crn"),
 ]
 
 

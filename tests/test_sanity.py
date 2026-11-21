@@ -245,6 +245,52 @@ def test_tree_flat_sees_the_same_data():
     assert any(not torch.equal(x, y) for x, y in zip(a.state_dict().values(), b.state_dict().values()))
 
 
+# controls for the Branched CORO mechanism: level 2 alone, and whether siblings win by sharing the user's future
+def test_tree_without_level1_is_level2_only():
+    from offpolicy import tree_loss
+    G1, k, b, H, beta = 4, 3, 2, 5, 0.5
+    logp, beh, _ = random_batch(G=G1 * k, n=2, H=H)
+    rew = torch.rand(len(logp), H, generator=torch.Generator().manual_seed(1))
+    lp = logp.clone().requires_grad_()
+    tree_loss(small_cfg(group_size=G1, tree_no_level1=True), lp, beh, rew, (b, k), beta).backward()
+    assert (lp.grad[:, :b] == 0).all()
+    lp2 = logp[:, b:].clone().requires_grad_()
+    (G1 * loss(small_cfg(objective="coro", group_size=k), lp2, beh[:, b:], None, rew[:, b:].sum(1), beta)).backward()
+    assert torch.allclose(lp.grad[:, b:], lp2.grad, atol=1e-6)
+
+
+def test_crn_groups_share_the_shift():
+    env = MemoryDialogue(np.repeat(np.arange(8), 4), 16, np.random.default_rng(0), crn=4)
+    env.reset()
+    for x in (env.t_shift, env.has_shift, env.g_new):
+        assert (x.reshape(8, 4) == x.reshape(8, 4)[:, :1]).all()
+    assert len(np.unique(env.t_shift)) > 1
+
+
+def test_fork_resample_redraws_only_the_future():
+    B, k, b = 2000, 4, 6
+    rng = np.random.default_rng(0)
+    env = MemoryDialogue(rng.integers(0, 8, B), 16, rng)  # shift prior: p=0.5, t_shift uniform on 4..11
+    env.reset()
+    for _ in range(b):
+        env.step(turn(B, "PASS", TOK["NONE"]))
+    seen = np.repeat(env.has_shift & (env.t_shift <= b), k)
+    before = {n: np.repeat(getattr(env, n), k) for n in ("g", "t_shift", "has_shift", "g_new")}
+    env.fork(k, resample=True)
+    assert all((getattr(env, n)[seen] == x[seen]).all() for n, x in before.items())  # the past is kept
+    assert (env.g == before["g"]).all() and not (env.has_shift & (env.t_shift <= b))[~seen].any()
+    assert (env.g_new != env.g0).all()
+    sib = env.t_shift.reshape(B, k)
+    assert (sib != sib[:, :1]).any(1)[~seen[::k]].mean() > 0.9  # siblings no longer share the future
+    p = 0.5 * 5 / 8 / (0.5 + 0.5 * 5 / 8)  # P(shift still to come | none by turn 6)
+    assert abs(env.has_shift[~seen].mean() - p) < 0.03
+
+
+def test_controls_train():
+    train(small_cfg(objective="coro", crn=True), log=False)
+    train(small_cfg(objective="tree", group_size=2, fork_resample=True, tree_no_level1=True), log=False)
+
+
 # 6. env bounds: scripted policies that only read their context
 def run_scripted(policy_fn, H, W, B=4000, seed=0, **env_kw):
     rng = np.random.default_rng(seed)

@@ -51,6 +51,9 @@ class Config:
     turn_penalty_lr: float = 0.0  # > 0: keep beta global, add a separate KL penalty per staleness bucket (E7)
     beta_path: str = ""  # control: replay the scalar beta of runs/<beta_path> per iteration instead of dual ascent
     branch: int = 4  # objective=tree/tree_flat: continuations per trunk; group_size is then trunks per seed
+    tree_no_level1: bool = False  # control: Branched CORO without level 1 (sibling contrast only)
+    fork_resample: bool = False  # control: forked siblings redraw the pending goal shift (no shared user future)
+    crn: bool = False  # control: the episodes of a flat CORO group share one goal-shift schedule, as siblings do
     groups: int = 32
     group_size: int = 8
     iters: int = 300
@@ -79,20 +82,20 @@ def max_staleness(cfg):
     return cfg.lag + ((cfg.H - 1) // cfg.U if cfg.U else 0) + cfg.qmax
 
 
-def rollout(policy_for, cfg, goals, rng, gen, stal, branch=(0, 1)):
+def rollout(policy_for, cfg, goals, rng, gen, stal, branch=(0, 1), crn=1):
     """policy_for(s) -> sampler weights s updates old; stal (B, H) picks them per episode and turn.
     branch=(b, k): after a shared prefix of b turns every episode forks into k continuations from the
     same state (rows grouped per parent), so B parents return B*k episodes. Version is relative (-stal)."""
     dev = next(policy_for(0).parameters()).device
     B, H = len(goals), cfg.H
-    env = MemoryDialogue(goals, H, rng, p_shift=cfg.p_shift, cost=cfg.cost)
+    env = MemoryDialogue(goals, H, rng, p_shift=cfg.p_shift, cost=cfg.cost, crn=crn)
     obs, obs_hist, act_hist, ctxs = env.reset(), [], [], []
     acts, logps = np.zeros((B, H, 2), np.int64), np.zeros((B, H, 2), np.float32)
     mems, rew = np.zeros((B, H), np.int64), np.zeros((B, H), np.float32)
     b, k = branch
     for t in range(H):
         if t == b and k > 1:
-            env.fork(k)
+            env.fork(k, cfg.fork_resample)
             rep = lambda x: np.repeat(x, k, axis=0)  # noqa: E731
             obs, stal, goals, acts, logps, mems, rew = map(rep, (obs, stal, goals, acts, logps, mems, rew))
             obs_hist, act_hist, ctxs = [rep(x) for x in obs_hist], [rep(x) for x in act_hist], [rep(x) for x in ctxs]
@@ -221,7 +224,8 @@ def train(cfg, log=True):
             beta[:] = beta_path[it]
         tree = cfg.objective in ("tree", "tree_flat")  # tree_flat: same forked data, plain CORO over all leaves of a seed
         branch = (int(rng.integers(1, H)), cfg.branch) if tree else (0, 1)  # branch turn drawn per batch
-        ro = rollout(policy_for, cfg, goals, rng, gen, stal, branch)
+        assert not (tree and cfg.crn) and (tree or not (cfg.fork_resample or cfg.tree_no_level1))
+        ro = rollout(policy_for, cfg, goals, rng, gen, stal, branch, crn=cfg.group_size if cfg.crn else 1)
         ro.version = it + ro.version
         turns = B * branch[0] + B * branch[1] * (H - branch[0])  # shared prefixes are generated once
         adv = torch.as_tensor(CREDIT[cfg.credit](ro, cfg), device=dev)

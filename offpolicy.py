@@ -49,6 +49,8 @@ def tree_loss(cfg, logp, beh, rew, branch, beta):
     l_suf, r_suf = (x[:, b:].sum(1).view(-1, G1, k) for x in (lt, rt))
     c = lambda x, d: x - x.mean(d, keepdim=True)  # noqa: E731
     lvl1 = ((c(l_pre, 1) - c(r_pre + r_suf.mean(2), 1)) ** 2).sum(1)
+    if cfg.tree_no_level1:  # control: sibling contrast only, so prefix turns get no gradient
+        lvl1 = torch.zeros_like(lvl1)
     lvl2 = ((c(l_suf, 2) - c(r_suf, 2)) ** 2).sum((1, 2))
     return (lvl1 + lvl2).mean()
 

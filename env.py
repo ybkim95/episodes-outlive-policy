@@ -32,11 +32,13 @@ T_INFO = 3
 
 
 class MemoryDialogue:
-    def __init__(self, goals, H, rng, p_ask=0.5, p_mate=0.3, p_shift=0.5, cost=0.01):
+    def __init__(self, goals, H, rng, p_ask=0.5, p_mate=0.3, p_shift=0.5, cost=0.01, crn=1):
         assert H >= T_INFO + 2, "need room for the info phase and the final question"
         self.g0 = GOAL_IDS[np.asarray(goals)]
         self.B, self.H, self.rng = len(self.g0), H, rng
         self.p_ask, self.p_mate, self.p_shift, self.cost = p_ask, p_mate, p_shift, cost
+        assert self.B % crn == 0
+        self.crn = crn  # control: consecutive groups of crn episodes share one goal-shift schedule
 
     def _msg(self, actor, word, arg):
         return np.stack([np.broadcast_to(x, (self.B,)) for x in (actor, word, arg)], 1)
@@ -44,20 +46,39 @@ class MemoryDialogue:
     def reset(self):
         self.t, self.g = 0, self.g0.copy()
         self.mem = np.full(self.B, TOK["NONE"])
-        # the shift lands after the info phase and before the final question
-        lo, hi = max(T_INFO + 1, self.H // 4), min(self.H - 1, max(T_INFO + 2, 3 * self.H // 4))
-        self.t_shift = self.rng.integers(lo, max(hi, lo + 1), self.B)
-        self.has_shift = (self.rng.random(self.B) < self.p_shift) & (lo < hi)
-        gi = np.searchsorted(GOAL_IDS, self.g0)
-        self.g_new = GOAL_IDS[(gi + self.rng.integers(1, N_GOALS, self.B)) % N_GOALS]  # always a different goal
+        self.t_shift, self.has_shift, off = (np.repeat(x, self.crn) for x in self._draw_shift(self.B // self.crn))
+        self.g_new = self._new_goal(self.g0, off)
         return self._msg(TOK["<user>"], TOK["START"], TOK["NONE"])
 
-    def fork(self, k):
+    def _draw_shift(self, n):
+        """Prior over the goal shift: when, whether, and the goal offset. It lands after the info phase
+        and before the final question."""
+        lo, hi = max(T_INFO + 1, self.H // 4), min(self.H - 1, max(T_INFO + 2, 3 * self.H // 4))
+        t_shift = self.rng.integers(lo, max(hi, lo + 1), n)
+        has_shift = (self.rng.random(n) < self.p_shift) & (lo < hi)
+        return t_shift, has_shift, self.rng.integers(1, N_GOALS, n)
+
+    @staticmethod
+    def _new_goal(g0, off):
+        return GOAL_IDS[(np.searchsorted(GOAL_IDS, g0) + off) % N_GOALS]  # off in 1..N-1: always a different goal
+
+    def fork(self, k, resample=False):
         """Replicate every episode k times (rows stay grouped: episode i -> rows i*k .. i*k+k-1).
-        Copies share the full state, including the pending goal shift; later randomness diverges."""
+        Copies share the full state, including the pending goal shift; later randomness diverges.
+        resample=True (control): each copy redraws a shift it has not seen yet, from the prior given
+        that none happened so far, so siblings share the history but not the user's future."""
         for name in ("g0", "g", "mem", "t_shift", "has_shift", "g_new"):
             setattr(self, name, np.repeat(getattr(self, name), k))
         self.B *= k
+        todo = ~(self.has_shift & (self.t_shift <= self.t)) if resample else np.zeros(self.B, bool)
+        while todo.any():  # rejection sampling: drop draws whose shift would already have happened
+            idx = np.nonzero(todo)[0]
+            t_shift, has_shift, off = self._draw_shift(len(idx))
+            ok = ~(has_shift & (t_shift <= self.t))
+            idx = idx[ok]
+            self.t_shift[idx], self.has_shift[idx] = t_shift[ok], has_shift[ok]
+            self.g_new[idx] = self._new_goal(self.g0[idx], off[ok])
+            todo[idx] = False
 
     def step(self, act):
         """act: (B, 2) [verb, arg] tokens for turn self.t. Returns (next_obs or None, reward, done)."""
