@@ -276,7 +276,7 @@ def test_fork_resample_redraws_only_the_future():
         env.step(turn(B, "PASS", TOK["NONE"]))
     seen = np.repeat(env.has_shift & (env.t_shift <= b), k)
     before = {n: np.repeat(getattr(env, n), k) for n in ("g", "t_shift", "has_shift", "g_new")}
-    env.fork(k, resample=True)
+    env.fork(k, np.random.default_rng(1))
     assert all((getattr(env, n)[seen] == x[seen]).all() for n, x in before.items())  # the past is kept
     assert (env.g == before["g"]).all() and not (env.has_shift & (env.t_shift <= b))[~seen].any()
     assert (env.g_new != env.g0).all()
@@ -286,9 +286,72 @@ def test_fork_resample_redraws_only_the_future():
     assert abs(env.has_shift[~seen].mean() - p) < 0.03
 
 
+def test_controls_keep_the_random_stream():
+    # a control must see the same goals, staleness and fork turns as its reference run, update by update
+    stale = dict(U=3, qmax=2, iters=4)
+    for kw_ref, kw_ctl in ((dict(objective="coro"), dict(objective="coro", crn=True)),
+                           (dict(objective="tree", group_size=2), dict(objective="tree", group_size=2, fork_resample=True))):
+        (_, ma), (_, mb) = (train(small_cfg(**stale, **kw), log=False) for kw in (kw_ref, kw_ctl))
+        for x in ("staleness", "staleness_max", "branch_turn", "env_steps"):
+            assert [r[x] for r in ma] == [r[x] for r in mb], x
+    rng_a, rng_b = np.random.default_rng(0), np.random.default_rng(0)
+    MemoryDialogue(np.arange(8), 16, rng_a).reset()
+    MemoryDialogue(np.arange(8), 16, rng_b, crn=4).reset()
+    assert rng_a.random() == rng_b.random()
+
+
 def test_controls_train():
-    train(small_cfg(objective="coro", crn=True), log=False)
     train(small_cfg(objective="tree", group_size=2, fork_resample=True, tree_no_level1=True), log=False)
+    train(small_cfg(objective="tree_ppo", group_size=2, U=3, qmax=2), log=False)
+
+
+def test_tree_ppo_advantages():
+    # suffix: standardised among siblings; prefix: sibling 0 only, standardised across trunks
+    from offpolicy import tree_advantages
+    G1, k, b, H = 2, 2, 1, 3
+    rew = np.zeros((G1 * k, H), np.float32)
+    rew[:, 0] = [-0.01, -0.01, 0.0, 0.0]  # prefix reward per trunk (copied to both siblings)
+    rew[:, -1] = [1, 0, 1, 1]  # trunk 0: one success of two; trunk 1: both succeed
+    adv = tree_advantages(rew, (b, k), G1)
+    assert np.allclose(adv[:, b:], np.array([1, -1, 0, 0])[:, None], atol=1e-4)
+    assert adv[1, 0] == 0 and adv[3, 0] == 0  # the shared prefix counts once
+    assert np.allclose(adv[[0, 2], 0], [-1, 1], atol=1e-4)  # trunk 1 is worth more (1.0 vs 0.49)
+
+
+def test_rows_slices_a_rollout():
+    cfg = small_cfg()
+    model, ro = small_rollout(cfg)
+    sl = slice(4, 12)
+    with torch.no_grad():
+        # allclose, not equal: some CPU kernels round differently for different batch sizes
+        assert torch.allclose(score_rollout(model, ro.rows(sl)), score_rollout(model, ro)[sl], atol=1e-6)
+    assert np.array_equal(ro.rows(sl).ret, ro.ret[sl])
+
+
+def test_minibatch_steps_see_drift():
+    # synchronous data is exactly on-policy for one step per batch; with two steps the second half is not
+    one = train(small_cfg(objective="coro", sync=True, iters=1), log=False)[1][0]
+    two = train(small_cfg(objective="coro", sync=True, iters=1, minibatches=2), log=False)[1][0]
+    assert one["log_ratio_abs"] < 1e-6  # zero up to batch-size-dependent rounding
+    assert two["log_ratio_abs"] > 1e3 * max(one["log_ratio_abs"], 1e-9) and two["train_return"] == one["train_return"]
+
+
+def test_ppo_clip_direction():
+    # positive advantage: push log-prob up until the ratio passes 1 + clip, then stop
+    cfg = small_cfg(objective="ppo", clip=0.2)
+    beh = torch.zeros(1, 1, 2)
+    adv = torch.ones(1, 1)
+    for shift, moving in ((0.0, True), (0.5, False)):
+        lp = torch.full((1, 1, 2), shift).requires_grad_()
+        loss(cfg, lp, beh, adv, None, None).backward()
+        assert ((lp.grad < 0).all() if moving else (lp.grad == 0).all()), shift
+
+
+def test_eval_does_not_touch_training():
+    # evaluation has its own random streams, so evaluating more often must not change training
+    a = train(small_cfg(U=3, qmax=2, eval_every=1), log=False)[0]
+    b = train(small_cfg(U=3, qmax=2, eval_every=1000), log=False)[0]
+    assert all(torch.equal(x, y) for x, y in zip(a.state_dict().values(), b.state_dict().values()))
 
 
 # 6. env bounds: scripted policies that only read their context

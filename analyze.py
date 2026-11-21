@@ -189,6 +189,15 @@ CONTROLS = [  # (label, run prefix); every run is seeds 0-2 at 1000 updates; see
     ("M1 E5, level 2 only", "k_tree_lvl2"),  # scripts/mechanism.sh
     ("M2 E5, siblings redraw the pending goal change", "k_tree_resample"),
     ("M3 E4, each group shares one goal-change schedule", "k_coro_crn"),
+    ("M1p M1 paired, E5's beta path replayed", "v_tree_lvl2_bp"),  # scripts/review.sh
+    ("M2p M2 paired, E5's beta path replayed", "v_tree_resample_bp"),
+    ("M3p M3 paired, E4's beta path replayed", "v_coro_crn_bp"),
+    ("E1 PPO-clip, flat, no budget", "m_E1_ppo"),
+    ("Branched CORO, no budget (beta 0.3 fixed)", "f_tree_beta0.3"),
+    ("B1 forked data, branched PPO-clip, no budget", "v_tree_ppo"),
+    ("S1 sync CORO, 4 minibatch steps per batch", "v_sync_coro_mb4"),
+    ("S2 sync PPO-clip, 4 minibatch steps per batch", "v_sync_ppo_mb4"),
+    ("S3 sync policy gradient, 4 minibatch steps per batch", "v_sync_none_mb4"),
 ]
 
 

@@ -11,6 +11,7 @@ oapl / coro  regress the episode log-ratio l_i = sum_t log(pi/mu) onto episode r
 """
 import math
 
+import numpy as np
 import torch
 
 
@@ -53,6 +54,23 @@ def tree_loss(cfg, logp, beh, rew, branch, beta):
         lvl1 = torch.zeros_like(lvl1)
     lvl2 = ((c(l_suf, 2) - c(r_suf, 2)) ** 2).sum((1, 2))
     return (lvl1 + lvl2).mean()
+
+
+def tree_advantages(rew, branch, G1, eps=1e-6):
+    """Branched PPO-clip baseline (VinePPO / Tree-GRPO style) on the same forked data: the per-turn
+    advantages that Branched CORO's two levels imply, standardised as in credit.A0. Suffix turns get the
+    suffix return standardised among the k siblings. Prefix turns get prefix reward + mean continuation
+    return standardised across the G1 trunks, on sibling 0 only, since the k copies of a prefix are one
+    sample (as in tree_loss level 1). rew: (n*G1*k, H) numpy. Returns (n*G1*k, H) float32."""
+    b, k = branch
+    H = rew.shape[1]
+    r_pre = rew[:, :b].sum(1).reshape(-1, G1, k)[:, :, 0]
+    r_suf = rew[:, b:].sum(1).reshape(-1, G1, k)
+    z = lambda x, d: (x - x.mean(d, keepdims=True)) / (x.std(d, keepdims=True) + eps)  # noqa: E731
+    adv = np.zeros((len(rew) // (G1 * k), G1, k, H), np.float32)
+    adv[..., b:] = z(r_suf, 2)[..., None]
+    adv[:, :, 0, :b] = z(r_pre + r_suf.mean(2), 1)[..., None]
+    return adv.reshape(rew.shape)
 
 
 def turn_kl_penalty(logp, beh, lam):

@@ -4,7 +4,7 @@ Each turn keeps the exact token context the sampler fed the policy, the sampled 
 behaviour log-probs, and the policy version. The trainer scores these stored contexts directly; it never
 rebuilds context from text or from full history, which would silently make the data off-policy.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 
@@ -25,6 +25,11 @@ class Rollout:
     @property
     def ret(self):
         return self.reward.sum(1)
+
+    def rows(self, sl):
+        """The episodes in slice sl, for minibatch steps. Keep whole groups (and whole forks) together."""
+        return replace(self, ctx=[c[sl] for c in self.ctx], act=self.act[sl], logp=self.logp[sl], mem=self.mem[sl],
+                       reward=self.reward[sl], goal=self.goal[sl], version=self.version[sl])
 
 
 def build_context(mem, obs_hist, act_hist, W):

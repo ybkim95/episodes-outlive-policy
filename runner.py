@@ -22,7 +22,7 @@ from torch import nn
 
 from credit import CREDIT
 from env import N_GOALS, TOK, VOCAB, MemoryDialogue
-from offpolicy import drift_stats, loss, tree_loss, turn_kl_penalty
+from offpolicy import drift_stats, loss, tree_advantages, tree_loss, turn_kl_penalty
 from policy import Policy, act, score
 from traj import Rollout, build_context, max_context_len
 
@@ -50,10 +50,11 @@ class Config:
     beta_lr: float = 1.0
     turn_penalty_lr: float = 0.0  # > 0: keep beta global, add a separate KL penalty per staleness bucket (E7)
     beta_path: str = ""  # control: replay the scalar beta of runs/<beta_path> per iteration instead of dual ascent
-    branch: int = 4  # objective=tree/tree_flat: continuations per trunk; group_size is then trunks per seed
+    branch: int = 4  # objective=tree/tree_flat/tree_ppo: continuations per trunk; group_size is then trunks per seed
     tree_no_level1: bool = False  # control: Branched CORO without level 1 (sibling contrast only)
     fork_resample: bool = False  # control: forked siblings redraw the pending goal shift (no shared user future)
     crn: bool = False  # control: the episodes of a flat CORO group share one goal-shift schedule, as siblings do
+    minibatches: int = 1  # control: split each batch into this many whole-group steps, so later steps see l != 0
     groups: int = 32
     group_size: int = 8
     iters: int = 300
@@ -82,7 +83,7 @@ def max_staleness(cfg):
     return cfg.lag + ((cfg.H - 1) // cfg.U if cfg.U else 0) + cfg.qmax
 
 
-def rollout(policy_for, cfg, goals, rng, gen, stal, branch=(0, 1), crn=1):
+def rollout(policy_for, cfg, goals, rng, gen, stal, branch=(0, 1), crn=1, fork_rng=None):
     """policy_for(s) -> sampler weights s updates old; stal (B, H) picks them per episode and turn.
     branch=(b, k): after a shared prefix of b turns every episode forks into k continuations from the
     same state (rows grouped per parent), so B parents return B*k episodes. Version is relative (-stal)."""
@@ -95,7 +96,7 @@ def rollout(policy_for, cfg, goals, rng, gen, stal, branch=(0, 1), crn=1):
     b, k = branch
     for t in range(H):
         if t == b and k > 1:
-            env.fork(k, cfg.fork_resample)
+            env.fork(k, fork_rng)
             rep = lambda x: np.repeat(x, k, axis=0)  # noqa: E731
             obs, stal, goals, acts, logps, mems, rew = map(rep, (obs, stal, goals, acts, logps, mems, rew))
             obs_hist, act_hist, ctxs = [rep(x) for x in obs_hist], [rep(x) for x in act_hist], [rep(x) for x in ctxs]
@@ -211,6 +212,15 @@ def train(cfg, log=True):
         (run_dir / "metrics.jsonl").write_text("")
 
     metrics, t0, env_steps = [], time.time(), 0
+    fork_rng = np.random.default_rng([cfg.seed, 1]) if cfg.fork_resample else None  # own stream: stays paired
+
+    def update(sub, loss_of_logp):
+        lv, lp = backward_two_pass(model, sub, loss_of_logp)
+        g = nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        opt.step()
+        opt.zero_grad()
+        return lv, lp, g
+
     for it in range(cfg.iters):
         goals = np.repeat(rng.integers(0, N_GOALS, cfg.groups), cfg.group_size)
         if cfg.sync:
@@ -222,10 +232,11 @@ def train(cfg, log=True):
             policy_for = lambda s: past[-1 - s]  # noqa: E731
         if beta_path:
             beta[:] = beta_path[it]
-        tree = cfg.objective in ("tree", "tree_flat")  # tree_flat: same forked data, plain CORO over all leaves of a seed
+        tree = cfg.objective in ("tree", "tree_flat", "tree_ppo")  # tree_flat: same forked data, plain CORO over all
+        # leaves of a seed; tree_ppo: same forked data, PPO-clip on the advantages the two levels imply
         branch = (int(rng.integers(1, H)), cfg.branch) if tree else (0, 1)  # branch turn drawn per batch
         assert not (tree and cfg.crn) and (tree or not (cfg.fork_resample or cfg.tree_no_level1))
-        ro = rollout(policy_for, cfg, goals, rng, gen, stal, branch, crn=cfg.group_size if cfg.crn else 1)
+        ro = rollout(policy_for, cfg, goals, rng, gen, stal, branch, crn=cfg.group_size if cfg.crn else 1, fork_rng=fork_rng)
         ro.version = it + ro.version
         turns = B * branch[0] + B * branch[1] * (H - branch[0])  # shared prefixes are generated once
         adv = torch.as_tensor(CREDIT[cfg.credit](ro, cfg), device=dev)
@@ -236,14 +247,23 @@ def train(cfg, log=True):
         pen = (lambda lp: turn_kl_penalty(lp, beh, lam_w)) if cfg.turn_penalty_lr > 0 else (lambda lp: 0.0)
         if cfg.objective == "tree":
             rew = torch.as_tensor(ro.reward, device=dev)
-            lossv, logp = backward_two_pass(model, ro, lambda lp: tree_loss(cfg, lp, beh, rew, branch, w) + pen(lp))
+            lossv, logp, gn = update(ro, lambda lp: tree_loss(cfg, lp, beh, rew, branch, w) + pen(lp))
         else:
             ret = torch.as_tensor(ro.ret, device=dev)
-            lcfg = replace(cfg, objective="coro", group_size=cfg.group_size * branch[1]) if tree else cfg
-            lossv, logp = backward_two_pass(model, ro, lambda lp: loss(lcfg, lp, beh, adv, ret, w) + pen(lp))
-        gn = nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-        opt.step()
-        opt.zero_grad()
+            if cfg.objective == "tree_ppo":
+                adv = torch.as_tensor(tree_advantages(ro.reward, branch, cfg.group_size), device=dev)
+                lcfg = replace(cfg, objective="ppo")
+            else:
+                lcfg = replace(cfg, objective="coro", group_size=cfg.group_size * branch[1]) if tree else cfg
+            if cfg.minibatches == 1:
+                lossv, logp, gn = update(ro, lambda lp: loss(lcfg, lp, beh, adv, ret, w) + pen(lp))
+            else:  # several steps per batch: from the second step on, the stored log-probs are behind the trainer
+                n = len(ro.act) // cfg.minibatches
+                assert not tree and cfg.turn_penalty_lr == 0 and n * cfg.minibatches == len(ro.act) and n % cfg.group_size == 0
+                outs = [update(ro.rows(sl), lambda lp, sl=sl: loss(lcfg, lp, beh[sl], adv[sl], ret[sl], w[sl]))
+                        for sl in (slice(j * n, (j + 1) * n) for j in range(cfg.minibatches))]
+                lossv, logp, gn = (torch.stack([o[0] for o in outs]).mean(), torch.cat([o[1] for o in outs]),
+                                   torch.stack([o[2] for o in outs]).mean())
 
         env_steps += turns
         m = dict(iter=it, staleness=float(stal.mean()), staleness_max=int(stal.max()), env_steps=env_steps, branch_turn=branch[0],
