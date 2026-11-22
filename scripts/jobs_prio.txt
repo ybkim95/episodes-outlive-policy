@@ -1,0 +1,80 @@
+n_T256_s0 --objective tree --groups 16 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 0
+n_T256_s1 --objective tree --groups 16 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 1
+n_T256_s2 --objective tree --groups 16 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 2
+n_T256_s3 --objective tree --groups 16 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 3
+n_T256_s4 --objective tree --groups 16 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 4
+n_T256_s5 --objective tree --groups 16 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 5
+n_T256_s6 --objective tree --groups 16 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 6
+n_T256_s7 --objective tree --groups 16 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 7
+n_E4_s0 --objective coro --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 0
+n_E5_s0 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 0
+n_E4_s1 --objective coro --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 1
+n_E5_s1 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 1
+n_E4_s2 --objective coro --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 2
+n_E5_s2 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 2
+n_E4_s3 --objective coro --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 3
+n_E5_s3 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 3
+n_E4_s4 --objective coro --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 4
+n_E5_s4 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 4
+n_E4_s5 --objective coro --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 5
+n_E5_s5 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 5
+n_E4_s6 --objective coro --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 6
+n_E5_s6 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 6
+n_E4_s7 --objective coro --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 7
+n_E5_s7 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 7
+q4_ppo_s0 --objective ppo --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 0
+q4sev_ppo_s0 --objective ppo --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 0
+q4_coro_s0 --objective coro --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 0
+q4sev_coro_s0 --objective coro --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 0
+q4_none_s0 --objective none --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 0
+q4sev_none_s0 --objective none --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 0
+q4_tree_s0 --objective tree --groups 26 --group_size 4 --branch 4 --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 0
+q4sev_tree_s0 --objective tree --groups 26 --group_size 4 --branch 4 --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 0
+q4_ppo_s1 --objective ppo --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 1
+q4sev_ppo_s1 --objective ppo --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 1
+q4_coro_s1 --objective coro --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 1
+q4sev_coro_s1 --objective coro --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 1
+q4_none_s1 --objective none --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 1
+q4sev_none_s1 --objective none --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 1
+q4_tree_s1 --objective tree --groups 26 --group_size 4 --branch 4 --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 1
+q4sev_tree_s1 --objective tree --groups 26 --group_size 4 --branch 4 --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 1
+q4_ppo_s2 --objective ppo --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 2
+q4sev_ppo_s2 --objective ppo --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 2
+q4_coro_s2 --objective coro --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 2
+q4sev_coro_s2 --objective coro --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 2
+q4_none_s2 --objective none --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 2
+q4sev_none_s2 --objective none --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 2
+q4_tree_s2 --objective tree --groups 26 --group_size 4 --branch 4 --U 4 --qmax 8 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 2
+q4sev_tree_s2 --objective tree --groups 26 --group_size 4 --branch 4 --U 1 --qmax 16 --H 16 --W 16 --iters 1000 --eval_every 50 --sampler_bits 4 --seed 2
+p_ppo_A0_clip0.1_s100 --objective ppo --credit A0 --clip 0.1 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_treeppo_A0_clip0.1_s100 --objective tree_ppo --groups 26 --group_size 4 --branch 4 --credit A0 --clip 0.1 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_ppo_A0_clip0.2_s100 --objective ppo --credit A0 --clip 0.2 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_treeppo_A0_clip0.2_s100 --objective tree_ppo --groups 26 --group_size 4 --branch 4 --credit A0 --clip 0.2 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_ppo_A0_clip0.3_s100 --objective ppo --credit A0 --clip 0.3 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_treeppo_A0_clip0.3_s100 --objective tree_ppo --groups 26 --group_size 4 --branch 4 --credit A0 --clip 0.3 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_ppo_A0dr_clip0.1_s100 --objective ppo --credit A0dr --clip 0.1 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_treeppo_A0dr_clip0.1_s100 --objective tree_ppo --groups 26 --group_size 4 --branch 4 --credit A0dr --clip 0.1 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_ppo_A0dr_clip0.2_s100 --objective ppo --credit A0dr --clip 0.2 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_treeppo_A0dr_clip0.2_s100 --objective tree_ppo --groups 26 --group_size 4 --branch 4 --credit A0dr --clip 0.2 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_ppo_A0dr_clip0.3_s100 --objective ppo --credit A0dr --clip 0.3 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+p_treeppo_A0dr_clip0.3_s100 --objective tree_ppo --groups 26 --group_size 4 --branch 4 --credit A0dr --clip 0.3 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --seed 100
+x_e7glob_lr100_s100 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --drift_budget 0.002 --beta_lr 0 --turn_penalty_lr 100 --turn_penalty_global --seed 100
+x_e7glob_lr100_s0 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --drift_budget 0.002 --beta_lr 0 --turn_penalty_lr 100 --turn_penalty_global --seed 0
+x_e7glob_lr100_s1 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --drift_budget 0.002 --beta_lr 0 --turn_penalty_lr 100 --turn_penalty_global --seed 1
+x_e7glob_lr100_s2 --objective tree --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --eval_every 50 --drift_budget 0.002 --beta_lr 0 --turn_penalty_lr 100 --turn_penalty_global --seed 2
+n_C1_s0 --objective tree_flat --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 0
+n_C2_s0 --objective coro --groups 26 --group_size 16 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 0
+n_C1_s1 --objective tree_flat --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 1
+n_C2_s1 --objective coro --groups 26 --group_size 16 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 1
+n_C1_s2 --objective tree_flat --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 2
+n_C2_s2 --objective coro --groups 26 --group_size 16 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 2
+n_C1_s3 --objective tree_flat --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 3
+n_C2_s3 --objective coro --groups 26 --group_size 16 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 3
+n_C1_s4 --objective tree_flat --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 4
+n_C2_s4 --objective coro --groups 26 --group_size 16 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 4
+n_C1_s5 --objective tree_flat --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 5
+n_C2_s5 --objective coro --groups 26 --group_size 16 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 5
+n_C1_s6 --objective tree_flat --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 6
+n_C2_s6 --objective coro --groups 26 --group_size 16 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 6
+n_C1_s7 --objective tree_flat --groups 26 --group_size 4 --branch 4 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 7
+n_C2_s7 --objective coro --groups 26 --group_size 16 --H 16 --W 16 --iters 1000 --U 4 --qmax 8 --drift_budget 0.002 --beta_lr 1 --eval_every 10 --seed 7

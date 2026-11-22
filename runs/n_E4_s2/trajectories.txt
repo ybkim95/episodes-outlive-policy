@@ -1,0 +1,143 @@
+goal=G5 return=+1.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G5    logp=-0.90 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G5    logp=-0.77 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G3    logp=-0.96 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G5    logp=-0.74 r=-0.00
+t=  4 v=+0 mem=NONE | <tool> ERROR NONE      -> WRITE G6     logp=-3.08 r=-0.00
+t=  5 v=+0 mem=G6   | <user> CHAT C1         -> LOOKUP G1    logp=-4.33 r=-0.00
+t=  6 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G3    logp=-1.37 r=-0.00
+t=  7 v=+0 mem=G6   | <user> NOW G6          -> LOOKUP G1    logp=-1.07 r=-0.00
+t=  8 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G6    logp=-2.58 r=-0.00
+t=  9 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G1    logp=-1.00 r=-0.00
+t= 10 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G5    logp=-1.44 r=-0.00
+t= 11 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G1    logp=-1.08 r=-0.00
+t= 12 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G3    logp=-2.47 r=-0.00
+t= 13 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G5    logp=-2.47 r=-0.00
+t= 14 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G6    logp=-0.26 r=-0.00
+t= 15 v=+0 mem=G6   | <user> QUESTION NONE   -> LOOKUP G6    logp=-0.01 r=+1.00
+
+goal=G3 return=+1.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G7    logp=-1.38 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G3       -> LOOKUP G5    logp=-2.11 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G3       -> LOOKUP G3    logp=-0.50 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G3       -> LOOKUP G3    logp=-0.50 r=-0.00
+t=  4 v=+0 mem=NONE | <tool> ERROR NONE      -> WRITE G6     logp=-2.67 r=-0.00
+t=  5 v=+0 mem=G6   | <user> CHAT C0         -> LOOKUP G5    logp=-1.27 r=-0.00
+t=  6 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP NONE  logp=-3.24 r=-0.00
+t=  7 v=+0 mem=G6   | <tool> ERROR NONE      -> WRITE G2     logp=-3.70 r=-0.00
+t=  8 v=+0 mem=G2   | <user> CHAT C2         -> LOOKUP NONE  logp=-3.00 r=-0.00
+t=  9 v=+0 mem=G2   | <tool> ERROR NONE      -> LOOKUP G3    logp=-0.79 r=-0.00
+t= 10 v=+0 mem=G2   | <tool> ERROR NONE      -> LOOKUP G3    logp=-0.43 r=-0.00
+t= 11 v=+0 mem=G2   | <tool> ERROR NONE      -> LOOKUP NONE  logp=-2.73 r=-0.00
+t= 12 v=+0 mem=G2   | <tool> ERROR NONE      -> PASS G3      logp=-3.41 r=-0.00
+t= 13 v=+0 mem=G2   | <user> CHAT C0         -> WRITE G1     logp=-5.00 r=-0.00
+t= 14 v=+0 mem=G1   | <user> CHAT C3         -> LOOKUP G5    logp=-2.45 r=-0.00
+t= 15 v=+0 mem=G1   | <user> QUESTION NONE   -> LOOKUP G3    logp=-0.01 r=+1.00
+
+goal=G6 return=+1.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G5    logp=-0.90 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G6       -> LOOKUP G3    logp=-1.06 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G6       -> LOOKUP G3    logp=-0.65 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G6       -> LOOKUP G3    logp=-1.27 r=-0.00
+t=  4 v=+0 mem=NONE | <tool> ERROR NONE      -> WRITE G3     logp=-2.76 r=-0.00
+t=  5 v=+0 mem=G3   | <user> CHAT C3         -> LOOKUP G3    logp=-1.61 r=-0.00
+t=  6 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G3    logp=-0.82 r=-0.00
+t=  7 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G6    logp=-3.32 r=-0.00
+t=  8 v=+0 mem=G3   | <tool> ERROR NONE      -> PASS G6      logp=-3.26 r=-0.00
+t=  9 v=+0 mem=G3   | <user> CHAT C2         -> WRITE G2     logp=-2.58 r=-0.00
+t= 10 v=+0 mem=G2   | <user> CHAT C3         -> LOOKUP G7    logp=-4.98 r=-0.00
+t= 11 v=+0 mem=G2   | <tool> ERROR NONE      -> LOOKUP G3    logp=-0.67 r=-0.00
+t= 12 v=+0 mem=G2   | <tool> ERROR NONE      -> LOOKUP G5    logp=-1.65 r=-0.00
+t= 13 v=+0 mem=G2   | <tool> ERROR NONE      -> LOOKUP G3    logp=-1.03 r=-0.00
+t= 14 v=+0 mem=G2   | <tool> ERROR NONE      -> LOOKUP G6    logp=-0.21 r=-0.00
+t= 15 v=+0 mem=G2   | <user> QUESTION NONE   -> LOOKUP G6    logp=-0.01 r=+1.00
+
+goal=G1 return=+1.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G1    logp=-2.65 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G1       -> LOOKUP G1    logp=-2.28 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G1       -> LOOKUP G1    logp=-0.71 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G1       -> LOOKUP G1    logp=-0.48 r=-0.00
+t=  4 v=+0 mem=NONE | <user> NOW G7          -> WRITE G6     logp=-2.76 r=-0.00
+t=  5 v=+0 mem=G6   | <user> CHAT C3         -> LOOKUP G7    logp=-0.72 r=-0.00
+t=  6 v=+0 mem=G6   | <tool> ERROR NONE      -> PASS G1      logp=-3.30 r=-0.00
+t=  7 v=+0 mem=G6   | <user> CHAT C1         -> LOOKUP G1    logp=-0.61 r=-0.00
+t=  8 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G3    logp=-2.61 r=-0.00
+t=  9 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G1    logp=-0.39 r=-0.00
+t= 10 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G1    logp=-1.13 r=-0.00
+t= 11 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP NONE  logp=-2.65 r=-0.00
+t= 12 v=+0 mem=G6   | <tool> ERROR NONE      -> LOOKUP G3    logp=-2.56 r=-0.00
+t= 13 v=+0 mem=G6   | <tool> ERROR NONE      -> PASS G2      logp=-6.07 r=-0.00
+t= 14 v=+0 mem=G6   | <user> CHAT C2         -> LOOKUP G0    logp=-2.69 r=-0.00
+t= 15 v=+0 mem=G6   | <user> QUESTION NONE   -> LOOKUP G7    logp=-0.01 r=+1.00
+
+goal=G1 return=+1.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G5    logp=-0.90 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G1       -> LOOKUP G3    logp=-0.99 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G1       -> WRITE G3     logp=-3.26 r=-0.00
+t=  3 v=+0 mem=G3   | <mate> SAYS G1         -> LOOKUP G3    logp=-1.07 r=-0.00
+t=  4 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G3    logp=-1.21 r=-0.00
+t=  5 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G1    logp=-0.38 r=-0.00
+t=  6 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G1    logp=-0.87 r=-0.00
+t=  7 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G1    logp=-0.79 r=-0.00
+t=  8 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G3    logp=-2.09 r=-0.00
+t=  9 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G5    logp=-3.04 r=-0.00
+t= 10 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G1    logp=-1.27 r=-0.00
+t= 11 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G3    logp=-0.83 r=-0.00
+t= 12 v=+0 mem=G3   | <tool> ERROR NONE      -> PASS G0      logp=-2.58 r=-0.00
+t= 13 v=+0 mem=G3   | <user> CHAT C0         -> LOOKUP G7    logp=-6.24 r=-0.00
+t= 14 v=+0 mem=G3   | <tool> ERROR NONE      -> LOOKUP G6    logp=-0.45 r=-0.00
+t= 15 v=+0 mem=G3   | <user> QUESTION NONE   -> LOOKUP G1    logp=-0.01 r=+1.00
+
+goal=G4 return=+0.99
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G7    logp=-1.38 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G4       -> LOOKUP G5    logp=-1.44 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G4       -> LOOKUP G4    logp=-1.90 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G4       -> LOOKUP G6    logp=-2.86 r=-0.00
+t=  4 v=+0 mem=NONE | <tool> ERROR NONE      -> WRITE G5     logp=-3.78 r=-0.00
+t=  5 v=+0 mem=G5   | <user> CHAT C0         -> LOOKUP G5    logp=-0.47 r=-0.00
+t=  6 v=+0 mem=G5   | <tool> ERROR NONE      -> LOOKUP G0    logp=-3.07 r=-0.00
+t=  7 v=+0 mem=G5   | <tool> ERROR NONE      -> LOOKUP G1    logp=-1.00 r=-0.00
+t=  8 v=+0 mem=G5   | <tool> ERROR NONE      -> LOOKUP G5    logp=-1.73 r=-0.00
+t=  9 v=+0 mem=G5   | <tool> ERROR NONE      -> LOOKUP G2    logp=-2.59 r=-0.00
+t= 10 v=+0 mem=G5   | <tool> ERROR NONE      -> LOOKUP G4    logp=-0.70 r=-0.00
+t= 11 v=+0 mem=G5   | <user> NOW G2          -> LOOKUP G1    logp=-1.28 r=-0.00
+t= 12 v=+0 mem=G5   | <tool> ERROR NONE      -> PASS G0      logp=-2.36 r=-0.00
+t= 13 v=+0 mem=G5   | <user> CHAT C0         -> ASK G2       logp=-9.67 r=-0.01
+t= 14 v=+0 mem=G5   | <user> UNKNOWN NONE    -> LOOKUP G6    logp=-0.61 r=-0.00
+t= 15 v=+0 mem=G5   | <user> QUESTION NONE   -> LOOKUP G2    logp=-0.00 r=+1.00
+
+goal=G5 return=+1.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G5    logp=-0.90 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G0    logp=-3.29 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G3    logp=-0.99 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G5    logp=-0.75 r=-0.00
+t=  4 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G5    logp=-1.06 r=-0.00
+t=  5 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G5    logp=-0.18 r=-0.00
+t=  6 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G5    logp=-0.99 r=-0.00
+t=  7 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G1    logp=-1.03 r=-0.00
+t=  8 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G5    logp=-1.29 r=-0.00
+t=  9 v=+0 mem=NONE | <user> NOW G0          -> LOOKUP G1    logp=-1.33 r=-0.00
+t= 10 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G4    logp=-2.23 r=-0.00
+t= 11 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G1    logp=-1.11 r=-0.00
+t= 12 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G3    logp=-2.64 r=-0.00
+t= 13 v=+0 mem=NONE | <tool> ERROR NONE      -> PASS G1      logp=-2.22 r=-0.00
+t= 14 v=+0 mem=NONE | <user> CHAT C0         -> LOOKUP G2    logp=-3.09 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> LOOKUP G0    logp=-0.01 r=+1.00
+
+goal=G5 return=+1.00
+t=  0 v=+0 mem=NONE | <user> START NONE      -> LOOKUP G7    logp=-1.38 r=-0.00
+t=  1 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G3    logp=-1.00 r=-0.00
+t=  2 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G3    logp=-0.57 r=-0.00
+t=  3 v=+0 mem=NONE | <tool> RESULT G5       -> LOOKUP G3    logp=-0.96 r=-0.00
+t=  4 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G3    logp=-1.09 r=-0.00
+t=  5 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G5    logp=-0.26 r=-0.00
+t=  6 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G0    logp=-3.15 r=-0.00
+t=  7 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP NONE  logp=-2.94 r=-0.00
+t=  8 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G0    logp=-1.94 r=-0.00
+t=  9 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G1    logp=-1.23 r=-0.00
+t= 10 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G4    logp=-1.87 r=-0.00
+t= 11 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G3    logp=-0.72 r=-0.00
+t= 12 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G1    logp=-2.15 r=-0.00
+t= 13 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP NONE  logp=-4.00 r=-0.00
+t= 14 v=+0 mem=NONE | <tool> ERROR NONE      -> LOOKUP G6    logp=-0.45 r=-0.00
+t= 15 v=+0 mem=NONE | <user> QUESTION NONE   -> LOOKUP G5    logp=-0.01 r=+1.00

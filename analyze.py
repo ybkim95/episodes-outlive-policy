@@ -4,6 +4,7 @@ usage: python analyze.py   -> prints a markdown table, writes figs/main_curves.p
 final = mean held-out goal rate over the last 3 evals; auc = mean over all evals (sample efficiency).
 Every seed is listed; nothing is dropped.
 """
+import itertools
 import json
 import re
 from collections import defaultdict
@@ -47,14 +48,14 @@ def read(name):
     return [json.loads(line) for line in (HERE / "runs" / name / "metrics.jsonl").read_text().splitlines()]
 
 
-def select_e7():
-    """Multiplier step size for E7, chosen on tuning seed 100 only: best final goal, then best AUC."""
+def select_e7(pre="e7"):
+    """Multiplier step size for E7 (or X1), chosen on tuning seed 100 only: best final goal, then best AUC."""
     score = {}
     for lr in E7_LRS:
-        g = final_goal(f"e7_lr{lr}", 100)
+        g = final_goal(f"{pre}_lr{lr}", 100)
         if g is None:
             return None  # sweep not finished
-        score[lr] = (round(g, 2), evals(read(f"e7_lr{lr}_s100"))[1].mean())
+        score[lr] = (round(g, 2), evals(read(f"{pre}_lr{lr}_s100"))[1].mean())
     return max(score, key=score.get)
 
 
@@ -348,6 +349,173 @@ def severity():
     fig.savefig(HERE / "figs/severity.png", dpi=150)
 
 
+def seeds(pre):
+    return [read(f"{pre}_s{s}") for s in (0, 1, 2) if (HERE / "runs" / f"{pre}_s{s}" / "metrics.jsonl").exists()]
+
+
+def fixes():
+    """X1: the fix the talk proposed for per-turn budgets: E7 with beta held at 0.3, so only the per-bucket KL
+    multipliers move. Step size chosen on seed 100 as for E7. X2: is branching's gain specific to stale data?"""
+    sel = select_e7("x_e7fix")
+    print(f"\n| X1 step | seed 100 (tuning) | seeds 0, 1, 2 | updates to 0.9 (seeds 0-2) |")
+    print("|---|---|---|---|")
+    for lr in E7_LRS if sel is not None else ():
+        v = [final_goal(f"x_e7fix_lr{lr}", s) for s in (100, 0, 1, 2)]
+        its = [first_at(read(f"x_e7fix_lr{lr}_s{s}"), "iter") for s in (0, 1, 2)]
+        print(f"| {lr}{' (chosen)' if lr == sel else ''} | {v[0]:.2f} | " + ", ".join(f"{x:.2f}" for x in v[1:])
+              + " | " + ", ".join("-" if x is None else str(x) for x in its) + " |")
+    print("\n| config | final goal (per seed) | updates to 0.9 (per seed) |")
+    print("|---|---|---|")
+    rows = [("E0 CORO, no staleness", "m_E0_coro_sync"), ("X2 Branched CORO, no staleness", "x_tree_sync"),
+            ("E3 CORO, stale, no budget", "m_E3_coro"), ("Branched CORO, stale, no budget (beta 0.3)", "f_tree_beta0.3")]
+    if sel is not None:
+        rows += [("E7 per-turn penalty, beta by dual ascent", "e7_lr100"), (f"X1 per-turn penalty, beta fixed (step {sel})", f"x_e7fix_lr{sel}"),
+                 (f"X1g one global penalty, beta fixed (step {sel}, not retuned)", f"x_e7glob_lr{sel}")]
+    for label, pre in rows:
+        rr = seeds(pre)
+        if rr:
+            done = min(r[-1]["iter"] + 1 for r in rr)
+            print(f"| {label}{'' if done == 1000 else f' (at {done})'} | {', '.join(f'{evals(r)[1][-3:].mean():.2f}' for r in rr)} | "
+                  + ", ".join("-" if x is None else str(x) for x in (first_at(r, "iter") for r in rr)) + " |")
+
+
+def done_seeds(pre, n=8):
+    """Finished runs only (1000 updates), by seed."""
+    out = {}
+    for s in range(n):
+        p = HERE / "runs" / f"{pre}_s{s}" / "metrics.jsonl"
+        if p.exists():
+            rows = read(f"{pre}_s{s}")
+            if rows[-1]["iter"] + 1 == 1000:
+                out[s] = rows
+    return out
+
+
+def rank_test(a, b):
+    """Exact two-sided permutation test on the mean rank (Mann-Whitney), over every split of the pooled runs."""
+    x = np.r_[a, b].astype(float)
+    rk = np.argsort(np.argsort(x, kind="stable"), kind="stable").astype(float)
+    for v in np.unique(x):  # average ranks for ties
+        rk[x == v] = rk[x == v].mean()
+    obs = abs(rk[: len(a)].mean() - rk[len(a):].mean())
+    d = [abs(rk[list(c)].mean() - np.delete(rk, c).mean()) for c in itertools.combinations(range(len(x)), len(a))]
+    return float(np.mean(np.array(d) >= obs - 1e-9))
+
+
+EIGHT = [  # (label, run prefix, episodes per update); scripts/review2.sh, eval every 10 updates
+    ("E4 CORO + budget", "n_E4", 256), ("T256 Branched CORO + budget", "n_T256", 256),
+    ("E5 Branched CORO + budget", "n_E5", 416), ("C1 flat CORO on E5's forked data", "n_C1", 416),
+    ("C2 CORO + budget, independent episodes", "n_C2", 416)]
+
+
+def eight_seeds():
+    """Q: is Branched CORO faster at the SAME batch size (T256 vs E4), and do the 3-seed results hold at 8 seeds?
+    A seed that never reaches 0.9 counts as 1001 updates (worst rank)."""
+    print("\n| config | episodes per update | seeds done | reached 0.9 | updates to 0.9 (per seed) | median | "
+          "k rewarded episodes to 0.9 (median) | M turns to 0.9 (median) | rank test vs E4: updates, turns |")
+    print("|---|---|---|---|---|---|---|---|---|")
+    its, tus = {}, {}
+    for label, pre, eps in EIGHT:
+        rr = done_seeds(pre)
+        if not rr:
+            continue
+        u = [first_at(r, "iter") for r in rr.values()]
+        its[pre] = np.array([1001 if x is None else x for x in u])
+        turns = [first_at(r, "env_steps") for r in rr.values()]
+        tus[pre] = np.array([np.inf if x is None else x for x in turns])
+        hit = [x for x in u if x is not None]
+        p = "" if pre == "n_E4" or "n_E4" not in its else \
+            f"p = {rank_test(its[pre], its['n_E4']):.3f}, {rank_test(tus[pre], tus['n_E4']):.3f}"
+        print(f"| {label} | {eps} | {len(rr)} | {len(hit)} | {', '.join('-' if x is None else str(x) for x in u)} | "
+              f"{np.median(its[pre]):.0f} | {np.median(its[pre]) * eps / 1e3:.0f} | "
+              f"{np.median([1e12 if x is None else x for x in turns]) / 1e6:.2f} | {p} |")
+    same = [s for s in (0, 1, 2) if (HERE / "runs" / f"n_E4_s{s}").exists()]
+    for new, old in (("n_E4", "m_E4_coro_budget"), ("n_E5", "m_E5_tree_budget")):  # eval has its own RNG stream
+        for s in same:
+            a, b = done_seeds(new).get(s), read(f"{old}_s{s}")
+            if a:
+                print(f"bit-identical training loss {new}_s{s} vs {old}_s{s}: {[m['loss'] for m in a] == [m['loss'] for m in b]}")
+
+
+def ppo_tuning():
+    """The PPO-clip baselines had untuned advantages and clip. Seed 100 only (tuning seed), as for every other knob."""
+    print("\n| advantages | clip | flat PPO-clip: final, updates to 0.9 | branched PPO-clip: final, updates to 0.9 |")
+    print("|---|---|---|---|")
+    for adv, lab in (("A0", "standardised"), ("A0dr", "centred only")):
+        for c in (0.1, 0.2, 0.3):
+            cells = []
+            for o in ("ppo", "treeppo"):
+                rr = done_seeds(f"p_{o}_{adv}_clip{c}", 101).get(100)
+                cells.append("-" if rr is None else f"{evals(rr)[1][-3:].mean():.2f}, {first_at(rr, 'iter') or 'never'}")
+            print(f"| {lab} | {c} | {cells[0]} | {cells[1]} |")
+    print("\n| config (no drift budget, staleness <= 11) | final goal (seeds 0, 1, 2) | updates to 0.9 (per seed) |")
+    print("|---|---|---|")
+    for label, pre in (("E1 flat PPO-clip, default (standardised, clip 0.2)", "m_E1_ppo"),
+                       ("flat PPO-clip, tuned (centred only, clip 0.2)", "p2_ppo_A0dr_clip0.2"),
+                       ("E3 flat CORO", "m_E3_coro"),
+                       ("B1 branched PPO-clip, default", "v_tree_ppo"),
+                       ("branched PPO-clip, tuned (centred only, clip 0.2)", "p2_treeppo_A0dr_clip0.2"),
+                       ("Branched CORO, beta 0.3", "f_tree_beta0.3")):
+        rr = list(done_seeds(pre, 3).values())
+        if rr:
+            print(f"| {label} | {', '.join(f'{evals(r)[1][-3:].mean():.2f}' for r in rr)} | "
+                  + ", ".join("-" if x is None else str(x) for x in (first_at(r, "iter") for r in rr)) + " |")
+
+
+LOWPREC = [("PPO-clip", "ppo"), ("CORO", "coro"), ("Branched CORO", "tree"), ("ignore staleness", "none")]
+LOWPREC_REF = {"q4": {"ppo": "m_E1_ppo", "coro": "m_E3_coro", "tree": "f_tree_beta0.3", "none": "m_E1b_naive"},
+               "q4sev": {"ppo": "sev_q16_ppo", "coro": "sev_q16_coro", "tree": None, "none": "sev_q16_none"}}
+
+
+def lowprec():
+    """Sampler on 4-bit weights, trainer full precision (scripts/lowprec.sh). No budget; beta 0.3."""
+    print("\n| objective | staleness <= 11: full precision | 4-bit sampler | staleness <= 31: full precision | 4-bit sampler |")
+    print("|---|---|---|---|---|")
+    stat = lambda rr, k: np.median([np.median([m[k] for m in r[100:]]) for r in rr])  # noqa: E731
+    drift = {}
+    for label, o in LOWPREC:
+        cells = []
+        for lvl in ("q4", "q4sev"):
+            for pre in (LOWPREC_REF[lvl][o], f"{lvl}_{o}"):
+                rr = list(done_seeds(pre, 3).values()) if pre else []
+                cells.append(", ".join(f"{evals(r)[1][-3:].mean():.2f}" for r in rr) or "-")
+                if rr:
+                    drift[(o, pre)] = (stat(rr, "kl_k3"), stat(rr, "ess_traj"))
+        print(f"| {label} | " + " | ".join(cells) + " |")
+    print("\nmedian over runs of the per-run median (updates 100-999): per-token KL, trajectory ESS")
+    for (o, pre), (kl, ess) in drift.items():
+        print(f"  {pre}: KL {kl:.1e}, ESS {ess:.2f}")
+
+
+ASYNC = [("CORO + drift budget", "a_coro_budget"), ("Branched CORO + budget", "a_tree_budget"), ("PPO-clip", "a_ppo")]
+
+
+def async_runs():
+    """Real asynchronous sampler and trainer (async_runner.py): staleness is measured, not set."""
+    print("\n| async | final goal (per seed) | updates to 0.9 | M turns to 0.9 | minutes to 0.9 | staleness: first turn, last turn, max | trainer idle |")
+    print("|---|---|---|---|---|---|---|")
+    fig, ax = plt.subplots(figsize=(5.5, 3.5))
+    for i, (label, pre) in enumerate(ASYNC):
+        rr = list(done_seeds(pre, 3).values())
+        if not rr:
+            continue
+        done = 1000 if len(rr) == 3 else rr[0][-1]["iter"] + 1
+        f = lambda xs, k=1, d=0: ", ".join("-" if x is None else f"{x / k:.{d}f}" for x in xs)  # noqa: E731
+        st = lambda key: np.mean([np.mean([m[key] for m in r]) for r in rr])  # noqa: E731
+        idle = np.mean([sum(m["wait"] for m in r) / r[-1]["wall"] for r in rr])
+        print(f"| {label}{'' if len(rr) == 3 else f' ({len(rr)} of 3 runs done)'} | {f([evals(r)[1][-3:].mean() for r in rr], d=2)} | "
+              f"{f([first_at(r, 'iter') for r in rr])} | {f([first_at(r, 'env_steps') for r in rr], 1e6, 2)} | "
+              f"{f([first_at(r, 'wall') for r in rr], 60)} | {st('stal_first'):.1f}, {st('stal_last'):.1f}, "
+              f"{max(m['staleness_max'] for r in rr for m in r)} | {idle:.0%} |")
+        for r in rr:
+            ev = [m for m in r if "eval_goal" in m]
+            ax.plot([m["wall"] / 60 for m in ev], [m["eval_goal"] for m in ev], color=f"C{i}", lw=1, alpha=0.8, label=label if r is rr[0] else None)
+    ax.set(xlabel="wall-clock minutes", ylabel="held-out goal rate", ylim=(0, 1.02), title="Real async sampler and trainer")
+    ax.legend(fontsize=7)
+    fig.tight_layout()
+    fig.savefig(HERE / "figs/async.png", dpi=150)
+
+
 if __name__ == "__main__":
     (HERE / "figs").mkdir(exist_ok=True)
     r = load()
@@ -359,3 +527,8 @@ if __name__ == "__main__":
     controls()
     followup()
     e7()
+    fixes()
+    async_runs()
+    eight_seeds()
+    ppo_tuning()
+    lowprec()

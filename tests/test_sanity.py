@@ -417,3 +417,53 @@ def test_env_bounds():
     assert 0.09 < run_scripted(context_only, H=64, W=8) < 0.16  # goal scrolled out: 1/8 guess
     assert abs(run_scripted(answers_early, H=16, W=16) + 0.14) < 1e-6  # 14 unasked answers, no reward
     assert 0.03 < run_scripted(uniform, H=16, W=16) < 0.07  # 1/9 goal minus ~0.06 cost
+
+
+def test_tree_ppo_advantages_centred_only():
+    # std=False (credit A0dr): the same advantages without the division, i.e. on CORO's reward scale
+    from offpolicy import tree_advantages
+    rew = np.zeros((4, 3), np.float32)
+    rew[:, 0], rew[:, -1] = [-0.01, -0.01, 0.0, 0.0], [1, 0, 1, 1]
+    adv = tree_advantages(rew, (1, 2), 2, std=False)
+    assert np.allclose(adv[:, 1:], np.array([0.5, -0.5, 0, 0])[:, None], atol=1e-6)
+    assert np.allclose(adv[[0, 2], 0], [-0.255, 0.255], atol=1e-6) and adv[1, 0] == 0 and adv[3, 0] == 0
+
+
+def test_global_penalty_multiplier_is_shared():
+    # one multiplier for every staleness bucket, stepped by the batch KL against the budget
+    _, m = train(small_cfg(objective="tree", group_size=2, U=3, qmax=2, drift_budget=1e-6, beta_lr=0.0,
+                           turn_penalty_lr=1e3, turn_penalty_global=True), log=False)
+    assert all(len(set(r["lam_by_stal"])) == 1 for r in m) and m[-1]["lam_by_stal"][0] > 0
+    for a, b in zip(m, m[1:]):
+        assert math.isclose(b["lam_by_stal"][0], max(0.0, a["lam_by_stal"][0] + 1e3 * (a["kl_k3"] - 1e-6)), rel_tol=1e-3, abs_tol=1e-4)
+    assert all(r["beta"] == 0.3 for r in m)  # beta_lr = 0 holds the anchor fixed
+
+
+def test_ring_buffer_gives_weights_exactly_s_updates_old(monkeypatch):
+    # inside train: a turn tagged s at iteration it was sampled with the weights the trainer had at it - s
+    import runner
+    seen, real = [], runner.rollout
+
+    def spy(policy_for, cfg, goals, rng, gen, stal, *a, **kw):
+        if len(goals) == cfg.groups * cfg.group_size:  # training batches only, not evaluation
+            seen.append({s: [p.detach().clone() for p in policy_for(s).parameters()] for s in {0, *np.unique(stal).tolist()}})
+        return real(policy_for, cfg, goals, rng, gen, stal, *a, **kw)
+
+    monkeypatch.setattr(runner, "rollout", spy)
+    runner.train(small_cfg(U=3, qmax=2, iters=8, eval_episodes=8), log=False)
+    assert len(seen) == 8 and max(max(u) for u in seen) >= 3
+    for it, used in enumerate(seen):
+        for s, params in used.items():
+            assert all(torch.equal(a, b) for a, b in zip(params, seen[it - s][0]))
+    assert not all(torch.equal(a, b) for a, b in zip(seen[0][0], seen[1][0]))  # the weights did change
+
+
+def test_low_precision_sampler():
+    from runner import fake_quant_
+    m = fake_quant_(fresh_policy(small_cfg(), 0), 4)
+    w = m.head.weight.detach().view(-1, 16)
+    assert all(len(torch.unique(row)) <= 15 for row in w)  # 4-bit signed: at most 15 levels per block
+    # at the first update every turn is fresh, so all drift is the sampler's rounding
+    exact = train(small_cfg(objective="coro", U=3, qmax=2, iters=1), log=False)[1][0]
+    low = train(small_cfg(objective="coro", U=3, qmax=2, iters=1, sampler_bits=4), log=False)[1][0]
+    assert exact["kl_k3"] < 1e-8 < 1e-5 < low["kl_k3"]

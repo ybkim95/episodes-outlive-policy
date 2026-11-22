@@ -49,12 +49,14 @@ class Config:
     drift_per_turn: bool = False  # one multiplier per staleness bucket instead of one for the batch
     beta_lr: float = 1.0
     turn_penalty_lr: float = 0.0  # > 0: keep beta global, add a separate KL penalty per staleness bucket (E7)
+    turn_penalty_global: bool = False  # the penalty's multiplier is one number set by the batch KL, not one per bucket
     beta_path: str = ""  # control: replay the scalar beta of runs/<beta_path> per iteration instead of dual ascent
     branch: int = 4  # objective=tree/tree_flat/tree_ppo: continuations per trunk; group_size is then trunks per seed
     tree_no_level1: bool = False  # control: Branched CORO without level 1 (sibling contrast only)
     fork_resample: bool = False  # control: forked siblings redraw the pending goal shift (no shared user future)
     crn: bool = False  # control: the episodes of a flat CORO group share one goal-shift schedule, as siblings do
     minibatches: int = 1  # control: split each batch into this many whole-group steps, so later steps see l != 0
+    sampler_bits: int = 0  # > 0: the sampler runs weights rounded to this many bits (low-precision inference); the trainer does not
     groups: int = 32
     group_size: int = 8
     iters: int = 300
@@ -79,14 +81,29 @@ def staleness(cfg, rng, B):
     return s
 
 
+def fake_quant_(model, bits, block=16):
+    """In place: round every weight matrix to signed `bits`-bit integers with one absmax scale per block of
+    `block` values, as a low-precision inference engine would (FP8/FP4 rollouts). Biases and norms stay
+    exact. The sampler then differs from the trainer even at staleness 0, and its log-probs are the mu."""
+    q = 2 ** (bits - 1) - 1
+    with torch.no_grad():
+        for p in model.parameters():
+            if p.dim() >= 2:
+                w = p.view(-1, block)
+                s = w.abs().amax(1, keepdim=True).clamp_min(1e-12) / q
+                p.copy_((w / s).round().clamp(-q, q).mul(s).view_as(p))
+    return model
+
+
 def max_staleness(cfg):
     return cfg.lag + ((cfg.H - 1) // cfg.U if cfg.U else 0) + cfg.qmax
 
 
-def rollout(policy_for, cfg, goals, rng, gen, stal, branch=(0, 1), crn=1, fork_rng=None):
+def rollout(policy_for, cfg, goals, rng, gen, stal, branch=(0, 1), crn=1, fork_rng=None, before_turn=None):
     """policy_for(s) -> sampler weights s updates old; stal (B, H) picks them per episode and turn.
     branch=(b, k): after a shared prefix of b turns every episode forks into k continuations from the
-    same state (rows grouped per parent), so B parents return B*k episodes. Version is relative (-stal)."""
+    same state (rows grouped per parent), so B parents return B*k episodes. Version is relative (-stal).
+    before_turn(t), if given, runs at each turn boundary (async_runner.py swaps weights there)."""
     dev = next(policy_for(0).parameters()).device
     B, H = len(goals), cfg.H
     env = MemoryDialogue(goals, H, rng, p_shift=cfg.p_shift, cost=cfg.cost, crn=crn)
@@ -95,6 +112,8 @@ def rollout(policy_for, cfg, goals, rng, gen, stal, branch=(0, 1), crn=1, fork_r
     mems, rew = np.zeros((B, H), np.int64), np.zeros((B, H), np.float32)
     b, k = branch
     for t in range(H):
+        if before_turn:
+            before_turn(t)
         if t == b and k > 1:
             env.fork(k, fork_rng)
             rep = lambda x: np.repeat(x, k, axis=0)  # noqa: E731
@@ -227,7 +246,7 @@ def train(cfg, log=True):
             stal = np.zeros((B, H), int)
             policy_for = lambda s: model  # noqa: E731
         else:
-            past.append(copy.deepcopy(model))
+            past.append(fake_quant_(copy.deepcopy(model), cfg.sampler_bits) if cfg.sampler_bits else copy.deepcopy(model))
             stal = np.minimum(staleness(cfg, rng, B), len(past) - 1)  # early on, the oldest weights we have
             policy_for = lambda s: past[-1 - s]  # noqa: E731
         if beta_path:
@@ -251,7 +270,7 @@ def train(cfg, log=True):
         else:
             ret = torch.as_tensor(ro.ret, device=dev)
             if cfg.objective == "tree_ppo":
-                adv = torch.as_tensor(tree_advantages(ro.reward, branch, cfg.group_size), device=dev)
+                adv = torch.as_tensor(tree_advantages(ro.reward, branch, cfg.group_size, std=cfg.credit == "A0"), device=dev)
                 lcfg = replace(cfg, objective="ppo")
             else:
                 lcfg = replace(cfg, objective="coro", group_size=cfg.group_size * branch[1]) if tree else cfg
@@ -270,6 +289,7 @@ def train(cfg, log=True):
                  wall=time.time() - t0, loss=lossv.item(), grad_norm=gn.item(), beta=float(beta.mean()),
                  beta_by_stal=beta.round(4).tolist(),
                  train_return=float(ro.ret.mean()), train_goal=float(ro.reward[:, -1].mean()),
+                 beh_nll=float(-ro.logp.mean()),  # mean -log mu of sampled tokens: the sampler's entropy, estimated
                  **drift_stats(logp, beh, cfg.group_size))
         if cfg.drift_budget > 0:  # dual ascent: tighten wherever the trainer has drifted past the budget
             lr_tok = (logp - beh).detach()
@@ -280,7 +300,9 @@ def train(cfg, log=True):
             m["kl_by_stal"] = [None if np.isnan(x) else float(x) for x in kl_by_stal]
             if cfg.turn_penalty_lr > 0:
                 m["lam_by_stal"] = lam.round(4).tolist()  # values used for this update
-                for s in np.unique(stal_turn):
+                if cfg.turn_penalty_global:
+                    lam[:] = max(0.0, lam[0] + cfg.turn_penalty_lr * (m["kl_k3"] - cfg.drift_budget))
+                for s in np.unique(stal_turn) if not cfg.turn_penalty_global else ():
                     lam[s] = max(0.0, lam[s] + cfg.turn_penalty_lr * (kl_by_stal[s] - cfg.drift_budget))
             if cfg.drift_per_turn:
                 for s in np.unique(stal_turn):
@@ -304,14 +326,14 @@ def train(cfg, log=True):
     return model, metrics
 
 
-def parse_args():
+def parse_args(cls=Config):
     p = argparse.ArgumentParser()
-    for f in fields(Config):
+    for f in fields(cls):
         if f.type is bool:
             p.add_argument(f"--{f.name}", action="store_true")
         else:
             p.add_argument(f"--{f.name}", type=type(f.default), default=f.default)
-    return Config(**vars(p.parse_args()))
+    return cls(**vars(p.parse_args()))
 
 
 if __name__ == "__main__":
