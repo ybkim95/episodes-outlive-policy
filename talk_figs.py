@@ -1,82 +1,64 @@
-"""Slide-sized figures for the talk (large type, one message each). Reads the same runs as analyze.py.
+"""Slide figures for the talk: one message each, drawn at the pixel size they take on a 1920x1080 slide.
 
-usage: python talk_figs.py   -> figs/talk_*.png
+usage: TALK_FONTS=<dir with Inter .ttf files> python talk_figs.py   -> figs/talk_*.png (transparent)
+Without TALK_FONTS the figures fall back to DejaVu Sans.
 """
+import os
+from pathlib import Path
+
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
+from matplotlib import font_manager  # noqa: E402
+from matplotlib.colors import LinearSegmentedColormap  # noqa: E402
 
-from analyze import HERE, evals, final_goal, load, read  # noqa: E402
+from analyze import BETA_SWEEP, HERE, evals, final_goal, first_at, load, read  # noqa: E402
 from runner import Config, staleness  # noqa: E402
 
-plt.rcParams.update({"font.size": 18, "axes.spines.top": False, "axes.spines.right": False,
-                     "axes.edgecolor": "#3D4757", "axes.labelcolor": "#3D4757", "xtick.color": "#3D4757",
-                     "ytick.color": "#3D4757", "font.family": "DejaVu Sans", "figure.facecolor": "#F7F6F2",
-                     "axes.facecolor": "#F7F6F2", "savefig.facecolor": "#F7F6F2"})
-NAVY, BLUE, ORANGE, GREY, RED, PURPLE, GOLD = "#14213D", "#2F6DB5", "#E07A1F", "#8A94A6", "#B23A48", "#7B5EA7", "#B8891A"
+for f in Path(os.environ.get("TALK_FONTS", "/nonexistent")).glob("*.ttf"):
+    font_manager.fontManager.addfont(str(f))
+
+# the deck's palette: ink and greys for baselines, one blue for Branched CORO, orange for failures
+INK, MUTED, GRID = "#15171A", "#5F6670", "#E3E5E8"
+BLUE, ORANGE, DARK, GREY, LIGHT = "#2446E6", "#E0592A", "#3B4048", "#7C828C", "#B3B8BF"
+PX = 0.72  # points per slide pixel at dpi 100
+plt.rcParams.update({
+    "font.family": ["Inter", "DejaVu Sans"], "font.size": 22 * PX, "axes.titlesize": 24 * PX,
+    "axes.labelsize": 22 * PX, "xtick.labelsize": 22 * PX, "ytick.labelsize": 22 * PX,
+    "axes.spines.top": False, "axes.spines.right": False, "axes.spines.left": False,
+    "axes.edgecolor": LIGHT, "axes.labelcolor": MUTED, "xtick.color": MUTED, "ytick.color": MUTED,
+    "axes.grid": True, "axes.grid.axis": "y", "grid.color": GRID, "grid.linewidth": 1,
+    "xtick.major.size": 0, "ytick.major.size": 0, "xtick.major.pad": 10, "ytick.major.pad": 10,
+    "axes.labelpad": 12, "axes.facecolor": "none", "figure.facecolor": "none", "savefig.transparent": True,
+    "lines.solid_capstyle": "round", "lines.dash_capstyle": "round"})
 OUT = HERE / "figs"
 
 
-def save(fig, name):
-    fig.tight_layout()
-    fig.savefig(OUT / name, dpi=150)
-    plt.close(fig)
+def fig(w, h, **kw):
+    """A figure of w x h slide pixels."""
+    return plt.subplots(figsize=(w / 100, h / 100), **kw)
 
 
-def mean_curve(rows_by_seed):
-    xs, ys = zip(*(evals(r) for r in rows_by_seed))
-    n = min(len(y) for y in ys)
-    return xs[0][:n] / 1e6, np.mean([y[:n] for y in ys], 0), [y[:n] for y in ys]
+def save(f, name, tight=True):
+    if tight:
+        f.tight_layout(pad=0.4)
+    f.savefig(OUT / name, dpi=200)
+    plt.close(f)
 
 
-def fig_staleness():
-    """Per-turn staleness for 24 episodes of one batch: older at the start, heavy-tailed across episodes."""
-    s = staleness(Config(H=16, W=16, U=4, qmax=8), np.random.default_rng(3), 24)
-    s = s[np.argsort(s[:, 0])]
-    fig, ax = plt.subplots(figsize=(8, 5.4))
-    im = ax.imshow(s, cmap="cividis_r", aspect="auto", vmin=0, vmax=s.max())
-    ax.set(xlabel="turn within the episode", ylabel="episode (sorted)", xticks=[0, 4, 8, 12, 15], yticks=[])
-    cb = fig.colorbar(im, ax=ax, pad=0.02)
-    cb.set_label("staleness (trainer updates)")
-    save(fig, "talk_staleness.png")
+def label(ax, x, y, text, bold=False, **kw):
+    ax.text(x, y, text, color=INK, fontsize=24 * PX, fontweight=600 if bold else 400, va="center", **kw)
 
 
-def fig_main(runs):
-    """Main matrix at matched agent turns: the four corrected objectives and the uncorrected one."""
-    fig, ax = plt.subplots(figsize=(11, 6.2))
-    spec = [("E1b_naive", "ignore staleness", RED, "--", 2), ("E1_ppo", "PPO-clip (token IS)", BLUE, "-", 2.5),
-            ("E3_coro", "CORO", NAVY, "-", 2.5), ("E4_coro_budget", "CORO + drift budget", GREY, "-", 2.5),
-            ("E5_tree_budget", "Branched CORO + budget", ORANGE, "-", 4)]
-    for cfg, lab, col, ls, lw in spec:
-        x, m, ys = mean_curve(list(runs[cfg].values()))
-        for y in ys:
-            ax.plot(x, y, color=col, alpha=0.18, lw=1)
-        ax.plot(x, m, color=col, ls=ls, lw=lw, label=lab)
-    ax.axhline(0.9, color="#3D4757", lw=1, ls=":")
-    ax.axhline(1 / 8, color="#3D4757", lw=1, ls=":")
-    ax.text(4.15, 0.125, "chance", va="center", fontsize=15, color="#3D4757")
-    ax.set(xlabel="agent turns generated (millions)", ylabel="held-out goal rate", ylim=(0, 1.03), xlim=(0, 4.15))
-    ax.legend(fontsize=15, loc="center right", frameon=False)
-    save(fig, "talk_main.png")
-
-
-def fig_severity():
-    names = [{"ppo": "m_E1_ppo", "oapl": "m_E2_oapl", "coro": "m_E3_coro", "none": "m_E1b_naive"}] + \
-            [{o: f"sev_q{q}_{o}" for o in ("ppo", "oapl", "coro", "none")} for q in (16, 48)]
-    fig, ax = plt.subplots(figsize=(10, 6.2))
-    for i, (obj, lab, col, mk) in enumerate([("ppo", "PPO-clip", BLUE, "o"), ("oapl", "OAPL", GREY, "s"),
-                                             ("coro", "CORO", NAVY, "D"), ("none", "ignore staleness", RED, "v")]):
-        v = [[final_goal(n[obj], s) for s in (0, 1, 2)] for n in names]
-        for j, vs in enumerate(v):
-            ax.scatter([j + 0.06 * (i - 1.5)] * 3, vs, color=col, alpha=0.35, s=40, marker=mk)
-        ax.plot(range(3), [np.mean(vs) for vs in v], color=col, lw=3, marker=mk, ms=10, label=lab)
-    ax.axhline(1 / 8, color="#3D4757", lw=1, ls=":")
-    ax.set_xticks(range(3), ["max 11", "max 31", "max 63"])
-    ax.set(xlabel="staleness within an episode (trainer updates)", ylabel="final goal rate (3 seeds)", ylim=(0, 1.05))
-    ax.legend(fontsize=15, loc="center left", frameon=False)
-    save(fig, "talk_severity.png")
+def spread(ys, gap, top):
+    """Label heights at least gap apart, in the data's order, none above top, so direct labels never overlap."""
+    order = np.argsort(ys)[::-1]
+    out = np.minimum(np.array(ys, float), top)
+    for a, b in zip(order, order[1:]):
+        out[b] = min(out[b], out[a] - gap)
+    return out
 
 
 def by_update(names):
@@ -87,83 +69,194 @@ def by_update(names):
     return np.array(it[:n]), np.mean([y[:n] for y in ys], 0), [y[:n] for y in ys]
 
 
+def fig_staleness():
+    """Per-turn staleness for 24 episodes of one batch: older at the start, heavy-tailed across episodes."""
+    s = staleness(Config(H=16, W=16, U=4, qmax=8), np.random.default_rng(3), 24)
+    s = s[np.argsort(s[:, 0])]
+    cmap = LinearSegmentedColormap.from_list("age", ["#EEF1FD", "#9FB1F4", BLUE, "#0E1C66"])
+    f, ax = fig(980, 620)
+    m = ax.pcolormesh(s, cmap=cmap, vmin=0, vmax=s.max(), edgecolors="#FCFCFB", linewidth=2.5)
+    ax.invert_yaxis()
+    ax.grid(False)
+    ax.spines["bottom"].set_visible(False)
+    ax.set(xticks=np.array([0, 4, 8, 12, 15]) + 0.5, xticklabels=[0, 4, 8, 12, 15], yticks=[],
+           xlabel="turn within the episode", ylabel="24 episodes from one batch")
+    cb = f.colorbar(m, ax=ax, pad=0.02, fraction=0.04, aspect=30)
+    cb.outline.set_visible(False)
+    cb.ax.tick_params(size=0, colors=MUTED)
+    cb.set_label("trainer updates since this turn was sampled", color=MUTED)
+    save(f, "talk_staleness.png")
+
+
+def fig_main(runs):
+    """Goal rate against sampled agent turns, mean of 3 seeds. The arrow joins where the two mean curves cross 0.9;
+    the 1.31M and 2.12M quoted on the slide are means of the per-seed crossings."""
+    f, ax = fig(1120, 640)
+    spec = [("E5_tree_budget", "Branched CORO + drift budget", BLUE, "-", 4.5),
+            ("E4_coro_budget", "CORO + drift budget", DARK, "-", 3),
+            ("E1_ppo", "PPO-clip, and CORO with no budget", LIGHT, "-", 2.5), ("E3_coro", None, LIGHT, "-", 2.5),
+            ("E1b_naive", "ignore staleness", ORANGE, (0, (2, 3)), 2.5)]
+    cross = {}
+    for cfg, lab, col, ls, lw in spec:
+        xs, ys = zip(*(evals(r) for r in runs[cfg].values()))
+        n = min(len(y) for y in ys)
+        x, m = xs[0][:n] / 1e6, np.mean([y[:n] for y in ys], 0)
+        ax.plot(x, m, color=col, ls=ls, lw=lw, label=lab)
+        i = np.argmax(m >= 0.9)
+        cross[cfg] = x[i - 1] + (0.9 - m[i - 1]) / (m[i] - m[i - 1]) * (x[i] - x[i - 1]) if m.max() >= 0.9 else None
+    a, b = cross["E5_tree_budget"], cross["E4_coro_budget"]
+    ax.annotate("", xy=(b, 0.9), xytext=(a, 0.9), arrowprops=dict(arrowstyle="-|>", color=INK, lw=1.8, mutation_scale=18,
+                                                                   shrinkA=6, shrinkB=6))
+    label(ax, (a + b) / 2, 0.86, "1.6×", ha="center", bold=True)
+    ax.text(0.03, 0.925, "0.9", color=MUTED, fontsize=20 * PX)
+    ax.axhline(0.9, color=MUTED, lw=1, ls=(0, (1, 3)))
+    ax.axhline(1 / 8, color=MUTED, lw=1, ls=(0, (1, 3)))
+    ax.text(4.12, 0.155, "chance", color=MUTED, ha="right", fontsize=20 * PX)
+    ax.legend(loc="center right", bbox_to_anchor=(1.0, 0.56), frameon=False, labelcolor=INK, fontsize=24 * PX,
+              handlelength=1.8, borderaxespad=0)
+    ax.set(xlabel="agent turns sampled (millions)", ylim=(0, 1.04), xlim=(0, 4.15), yticks=[0, 0.25, 0.5, 0.75, 1])
+    ax.set_ylabel("held-out goal rate, mean of 3 seeds")
+    save(f, "talk_main.png")
+
+
+CONTROL_ROWS = [  # (label, run prefix, family)
+    ("Branched CORO, both levels", "r_E5_tree_budget", "tree"),
+    ("Branched CORO, level 2 only", "v_tree_lvl2_bp", "tree"),
+    ("Branched CORO, siblings redraw the goal change", "v_tree_resample_bp", "tree"),
+    ("Same branches, PPO-clip", "v_tree_ppo", "flat"),
+    ("Same forked data, flat CORO", "c_tree_flat", "flat"),
+    ("416 independent episodes, flat CORO", "c_coro416", "flat"),
+    ("256 episodes, flat CORO", "r_E4_coro_budget", "flat"),
+]
+
+
 def fig_controls():
-    """Per update: more episodes (C2), the same forked data with a flat loss (C1), the two-level loss (E5)."""
-    fig, ax = plt.subplots(figsize=(11, 6.2))
-    spec = [("r_E4_coro_budget", "CORO, 256 episodes / update", GREY, 2.5), ("c_coro416", "CORO, 416 episodes / update", NAVY, 2.5),
-            ("c_tree_flat", "forked data (416 leaves), flat CORO", BLUE, 2.5), ("r_E5_tree_budget", "forked data, Branched CORO", ORANGE, 4)]
-    for pre, lab, col, lw in spec:
-        x, m, ys = by_update([f"{pre}_s{s}" for s in (0, 1, 2)])
-        for y in ys:
-            ax.plot(x, y, color=col, alpha=0.18, lw=1)
-        ax.plot(x, m, color=col, lw=lw, label=lab)
-    ax.axhline(0.9, color="#3D4757", lw=1, ls=":")
-    ax.set(xlabel="trainer updates", ylabel="held-out goal rate", ylim=(0, 1.03), xlim=(0, 800))
-    ax.legend(fontsize=15, loc="lower right", frameon=False)
-    save(fig, "talk_controls.png")
+    """Updates to 0.9 per seed (dots) and their mean (bar), for Branched CORO, its ablations and the flat controls."""
+    f, ax = fig(1664, 560)
+    f.subplots_adjust(left=0.36, right=0.90, top=0.97, bottom=0.17)
+    never = 745
+    for i, (lab, pre, fam) in enumerate(CONTROL_ROWS):
+        col = BLUE if fam == "tree" else GREY
+        its = [first_at(read(f"{pre}_s{s}"), "iter") for s in (0, 1, 2)]
+        got = [x for x in its if x is not None]
+        jit = {}
+        for x in its:
+            v = never if x is None else x
+            k = jit.setdefault(v, 0)
+            jit[v] += 1
+            ax.plot(v, i + (k - 1) * 0.16 if its.count(x) > 1 else i, "o", ms=11, mew=2, mec="#FCFCFB" if x else col,
+                    color=col if x else "none", alpha=0.9, zorder=4)
+        if len(got) == 3:
+            ax.plot([np.mean(got)] * 2, [i - 0.34, i + 0.34], color=INK, lw=3, zorder=5)
+            txt = f"{np.mean(got):.0f}"
+        else:
+            txt = f"{len(got)} of 3 seeds"
+        ax.text(1.005, i, txt, transform=ax.get_yaxis_transform(), color=INK, va="center",
+                fontsize=24 * PX, fontweight=600 if fam == "tree" else 400)
+        ax.text(-0.02, i, lab, transform=ax.get_yaxis_transform(), color=INK, va="center", ha="right", fontsize=24 * PX)
+    ax.axhline(2.5, color=GRID, lw=1.5)
+    ax.text(never, 3.42, "never", color=MUTED, ha="center", va="center", fontsize=20 * PX)
+    ax.set(ylim=(6.6, -0.6), yticks=[], xlim=(270, 775), xticks=[300, 400, 500, 600, 700])
+    ax.grid(axis="x")
+    ax.grid(axis="y", visible=False)
+    ax.spines["bottom"].set_visible(False)
+    ax.set_xlabel("trainer updates to reach a 0.9 goal rate (dots: seeds 0–2, bar: mean)")
+    save(f, "talk_controls.png", tight=False)
 
 
-def fig_turn_budget(runs):
+def fig_severity():
+    names = [{"ppo": "m_E1_ppo", "oapl": "m_E2_oapl", "coro": "m_E3_coro", "none": "m_E1b_naive"}] + \
+            [{o: f"sev_q{q}_{o}" for o in ("ppo", "oapl", "coro", "none")} for q in (16, 48)]
+    f, ax = fig(1000, 620)
+    f.subplots_adjust(left=0.11, right=0.74, top=0.96, bottom=0.15)
+    ends = []
+    for obj, lab, col, mk, ls in [("ppo", "PPO-clip", DARK, "o", "-"), ("oapl", "OAPL", GREY, "s", "-"),
+                                  ("coro", "CORO", LIGHT, "D", "-"), ("none", "ignore staleness", ORANGE, "o", (0, (2, 3)))]:
+        v = [[final_goal(n[obj], s) for s in (0, 1, 2)] for n in names]
+        means = [np.mean(vs) for vs in v]
+        ax.plot(range(3), means, color=col, lw=3, ls=ls, marker=mk, ms=11, mec="#FCFCFB", mew=2)
+        ends.append((means[-1], lab))
+    ys = spread([e[0] for e in ends], 0.07, 1.0)
+    for (_, lab), y in zip(ends, ys):
+        label(ax, 2.12, y, lab)
+    ax.axhline(1 / 8, color=MUTED, lw=1, ls=(0, (1, 3)))
+    ax.text(0, 0.155, "chance", color=MUTED, fontsize=20 * PX)
+    ax.set_xticks(range(3), ["11", "31", "63"])
+    ax.set(xlabel="maximum staleness within an episode (trainer updates)", ylabel="final goal rate, mean of 3 seeds",
+           ylim=(0, 1.05), xlim=(-0.15, 2.1))
+    save(f, "talk_severity.png", tight=False)
+
+
+def fig_turn_budget():
     """Per-turn budgets against Branched CORO, and why the KL-penalty version fails: its global beta reaches
     the floor while it is still learning. Replaying Branched CORO's beta path fixes it."""
-    fig, axs = plt.subplots(1, 2, figsize=(12.5, 6.6))
-    curves = [("Branched CORO + budget", "r_E5_tree_budget", ORANGE, "-", 4),
-              ("+ per-turn β", "m_E6_tree_turnbudget", PURPLE, "-", 2.5),
-              ("+ per-turn KL penalty", "e7_lr100", GOLD, "-", 3),
-              ("+ per-turn KL penalty, β path of\n   Branched CORO replayed", "c_e7_betaE5", "#5E4A14", "--", 2.5)]
+    f = plt.figure(figsize=(16.64, 5.6))
+    a0 = f.add_axes([0.04, 0.15, 0.36, 0.74])
+    a1 = f.add_axes([0.67, 0.15, 0.31, 0.74])
+    curves = [("Branched CORO + budget", "r_E5_tree_budget", BLUE, "-", 4.5),
+              ("KL penalty, β replayed", "c_e7_betaE5", DARK, (0, (4, 3)), 2.5),
+              ("per-turn KL penalty", "e7_lr100", ORANGE, "-", 3),
+              ("per-turn β", "m_E6_tree_turnbudget", ORANGE, (0, (2, 3)), 3)]
+    ends = []
     for lab, pre, col, ls, lw in curves:
         x, m, _ = by_update([f"{pre}_s{s}" for s in (0, 1, 2)])
-        axs[0].plot(x, m, color=col, ls=ls, lw=lw, label=lab)
-    axs[0].set(xlabel="trainer updates", ylabel="held-out goal rate", ylim=(0, 1.03))
-    axs[0].legend(fontsize=14, loc="upper left", bbox_to_anchor=(-0.1, -0.17), ncol=2, frameon=False)
-    for lab, pre, col in (("Branched CORO + budget", "m_E5_tree_budget", ORANGE), ("+ per-turn KL penalty", "e7_lr100", GOLD)):
+        a0.plot(x, m, color=col, ls=ls, lw=lw)
+        ends.append((m[-1], lab, np.mean([final_goal(pre, s) for s in (0, 1, 2)])))
+    for (_, lab, fin), y in zip(ends, spread([e[0] for e in ends], 0.075, 1.0)):
+        label(a0, 1025, y, f"{lab}  {fin:.2f}", bold=lab.startswith("Branched"))
+    a0.text(1025, 1.09, "final", color=MUTED, fontsize=20 * PX)
+    a0.set(ylim=(0, 1.04), xlim=(0, 1000), xlabel="trainer updates", yticks=[0, 0.25, 0.5, 0.75, 1])
+    a0.set_title("held-out goal rate, mean of 3 seeds", loc="left", color=INK, pad=14)
+    for pre, col, lab, xy in (("m_E5_tree_budget", BLUE, "Branched CORO", (650, 0.04)),
+                              ("e7_lr100", ORANGE, "per-turn KL penalty", (300, 4e-3))):
         b = np.mean([[r["beta"] for r in read(f"{pre}_s{s}")] for s in (0, 1, 2)], 0)
-        axs[1].plot(np.arange(1, len(b) + 1), b, color=col, lw=3, label=lab)
-    axs[1].axhline(1e-3, color="#3D4757", lw=1, ls=":")
-    axs[1].text(1000, 1.15e-3, "floor", ha="right", va="bottom", fontsize=15, color="#3D4757")
-    axs[1].set(xlabel="trainer updates", ylabel="global β (drift-budget dual)", yscale="log")
-    axs[1].legend(fontsize=14, frameon=False)
-    save(fig, "talk_turn_budget.png")
+        a1.plot(np.arange(1, len(b) + 1), b, color=col, lw=3.5 if col == BLUE else 3)
+        label(a1, *xy, lab)
+    a1.axhline(1e-3, color=MUTED, lw=1, ls=(0, (1, 3)))
+    a1.text(30, 1.25e-3, "floor", color=MUTED, fontsize=20 * PX)
+    a1.set(yscale="log", xlim=(0, 1000), ylim=(7e-4, 0.6), xlabel="trainer updates")
+    a1.set_title("global β, log scale", loc="left", color=INK, pad=14)
+    save(f, "talk_turn_budget.png", tight=False)
 
 
 def fig_beta_sweep():
     """Fixed beta from the first update, no drift budget: too small never learns, too large is slow."""
-    from analyze import BETA_SWEEP, first_at
-    fig, ax = plt.subplots(figsize=(11, 6.2))
-    for (obj, runs), col, off in zip(BETA_SWEEP.items(), (BLUE, ORANGE), (0.93, 1.08)):
+    f, ax = fig(1100, 620)
+    f.subplots_adjust(left=0.1, right=0.97, top=0.96, bottom=0.15)
+    for (obj, runs), col, off in zip(BETA_SWEEP.items(), (DARK, BLUE), (0.92, 1.09)):
         bs, means = sorted(runs), []
         for b in bs:
             its = [first_at(read(f"{runs[b]}_s{s}"), "iter") or 1000 for s in (0, 1, 2)]
-            ax.scatter([b * off] * 3, its, color=col, s=40, alpha=0.45)
+            ax.plot([b * off] * 3, its, "o", color=col, ms=9, alpha=0.35, mew=0)
             means.append(np.mean(its))
-        ax.plot(bs, means, color=col, lw=4 if obj.startswith("Branched") else 2.5, marker="o", ms=10, label=obj)
-    ax.axhline(1000, color="#3D4757", lw=1, ls=":")
-    ax.text(1.6e-3, 985, "never reached 0.9", fontsize=15, color="#3D4757", va="top")
-    ax.set(xscale="log", xlabel="β, fixed from the first update", ylabel="updates to reach 0.9", ylim=(250, 1040))
-    ax.legend(fontsize=15, loc="lower left", frameon=False)
-    save(fig, "talk_beta_sweep.png")
+        ax.plot(bs, means, color=col, lw=4.5 if col == BLUE else 3, marker="o", ms=11, mec="#FCFCFB", mew=2)
+        label(ax, 4.2, means[-1], obj, bold=col == BLUE)
+    ax.axhline(1000, color=MUTED, lw=1, ls=(0, (1, 3)))
+    ax.text(1.4e-3, 1035, "never reached 0.9 (drawn at 1000)", color=MUTED, fontsize=20 * PX)
+    ax.set(xscale="log", ylim=(250, 1080), xlim=(7e-4, 30), xticks=[1e-3, 0.03, 0.3, 3], xticklabels=["0.001", "0.03", "0.3", "3"],
+           xlabel="β, fixed from the first update", ylabel="updates to reach 0.9")
+    save(f, "talk_beta_sweep.png", tight=False)
 
 
 def fig_branch():
-    """Schematic: one trunk, forked at turn b into k continuations."""
-    fig, ax = plt.subplots(figsize=(10, 4.6))
+    """Schematic: one trunk, forked at turn b into k continuations from the same state."""
+    f, ax = fig(1000, 520)
     ax.axis("off")
     b, H, k = 6, 16, 4
-    ax.plot(range(b + 1), [0] * (b + 1), color=NAVY, lw=4, marker="o", ms=9)
-    ends = np.linspace(1.5, -1.5, k)
-    rng = np.random.default_rng(1)
-    for e, ok in zip(ends, (True, False, True, False)):
+    ax.plot(range(b + 1), [0] * (b + 1), color=INK, lw=4, marker="o", ms=10, mec="#FCFCFB", mew=2, zorder=3)
+    for e, ok in zip(np.linspace(1.6, -1.6, k), (True, False, True, False)):
         xs = np.arange(b, H)
-        ys = np.linspace(0, e, len(xs)) + np.r_[0, rng.normal(0, 0.06, len(xs) - 1)]
-        ax.plot(xs, ys, color=ORANGE, lw=2.5, marker="o", ms=6)
-        ax.text(H - 0.4, e, "r = 1" if ok else "r = 0", va="center", fontsize=17, color=NAVY)
-    ax.annotate("", xy=(b, -2.15), xytext=(0, -2.15), arrowprops=dict(arrowstyle="<->", color=NAVY, lw=2))
-    ax.text(b / 2, -2.5, "shared prefix (generated once)", ha="center", fontsize=16, color=NAVY)
-    ax.annotate("", xy=(H - 1, -2.15), xytext=(b, -2.15), arrowprops=dict(arrowstyle="<->", color=ORANGE, lw=2))
-    ax.text((b + H - 1) / 2, -2.5, f"k = {k} continuations from the same state", ha="center", fontsize=16, color=ORANGE)
-    ax.text(b, 0.35, "fork at turn b", ha="center", fontsize=16, color=NAVY)
-    ax.set(xlim=(-0.5, H + 0.8), ylim=(-2.8, 1.9))
-    save(fig, "talk_branch.png")
+        ys = e * (1 - np.exp(-(xs - b) / 1.6))
+        ax.plot(xs, ys, color=BLUE, lw=3, marker="o", ms=8, mec="#FCFCFB", mew=1.5, zorder=2)
+        label(ax, H - 0.35, ys[-1], "r = 1" if ok else "r = 0", bold=ok)
+    ax.plot(b, 0, "o", ms=18, color="#FCFCFB", mec=INK, mew=3, zorder=4)
+    label(ax, b - 0.3, -0.55, "fork at turn b", ha="right")
+    for x0, x1, txt in ((0, b, "shared prefix, sampled once"), (b, H - 1, "k = 4 continuations of the same state")):
+        ax.annotate("", xy=(x1, -2.25), xytext=(x0, -2.25), arrowprops=dict(arrowstyle="|-|", color=MUTED, lw=1.5,
+                                                                            mutation_scale=6))
+        ax.text((x0 + x1) / 2, -2.65, txt, ha="center", color=MUTED, fontsize=22 * PX, va="center")
+    ax.set(xlim=(-0.5, H + 1), ylim=(-2.9, 2.0))
+    save(f, "talk_branch.png")
 
 
 if __name__ == "__main__":
@@ -171,7 +264,7 @@ if __name__ == "__main__":
     fig_staleness()
     fig_main(r)
     fig_severity()
-    fig_turn_budget(r)
+    fig_turn_budget()
     fig_controls()
     fig_beta_sweep()
     fig_branch()
