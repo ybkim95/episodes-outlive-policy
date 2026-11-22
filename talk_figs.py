@@ -168,8 +168,8 @@ CONTROL_ROWS = [  # (label, run prefix, family); "n_" prefixes are the 8-run rer
     ("level 2 only (416)", "v_tree_lvl2_bp", "tree"),
     ("siblings redraw the goal change (416)", "v_tree_resample_bp", "tree"),
     ("same branches, PPO-clip, tuned (416)", "p2_treeppo_A0dr_clip0.2", "flat"),
-    ("same forked data, flat CORO (416)", "c_tree_flat", "flat"),
-    ("independent episodes, flat CORO (416)", "c_coro416", "flat"),
+    ("same forked data, flat CORO (416)", "n_C1", "flat"),
+    ("independent episodes, flat CORO (416)", "n_C2", "flat"),
     ("independent episodes, flat CORO (256)", "n_E4", "flat"),
 ]
 

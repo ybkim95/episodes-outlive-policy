@@ -6,6 +6,7 @@ Every seed is listed; nothing is dropped.
 """
 import itertools
 import json
+import math
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -412,8 +413,9 @@ def eight_seeds():
     """Q: is Branched CORO faster at the SAME batch size (T256 vs E4), and do the 3-seed results hold at 8 seeds?
     A seed that never reaches 0.9 counts as 1001 updates (worst rank)."""
     print("\n| config | episodes per update | seeds done | reached 0.9 | updates to 0.9 (per seed) | median | "
-          "k rewarded episodes to 0.9 (median) | M turns to 0.9 (median) | rank test vs E4: updates, turns |")
-    print("|---|---|---|---|---|---|---|---|---|")
+          "k rewarded episodes to 0.9 (median) | M turns to 0.9 (median) | rank test vs E4: updates, turns | "
+          "rank test vs E5: updates, turns |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
     its, tus = {}, {}
     for label, pre, eps in EIGHT:
         rr = done_seeds(pre)
@@ -426,9 +428,15 @@ def eight_seeds():
         hit = [x for x in u if x is not None]
         p = "" if pre == "n_E4" or "n_E4" not in its else \
             f"p = {rank_test(its[pre], its['n_E4']):.3f}, {rank_test(tus[pre], tus['n_E4']):.3f}"
+        p5 = "" if pre not in ("n_C1", "n_C2") or "n_E5" not in its else \
+            f"p = {rank_test(its[pre], its['n_E5']):.3f}, {rank_test(tus[pre], tus['n_E5']):.3f}"
         print(f"| {label} | {eps} | {len(rr)} | {len(hit)} | {', '.join('-' if x is None else str(x) for x in u)} | "
               f"{np.median(its[pre]):.0f} | {np.median(its[pre]) * eps / 1e3:.0f} | "
-              f"{np.median([1e12 if x is None else x for x in turns]) / 1e6:.2f} | {p} |")
+              f"{np.median([1e12 if x is None else x for x in turns]) / 1e6:.2f} | {p} | {p5} |")
+    if "n_C1" in its and "n_E5" in its and len(its["n_C1"]) == len(its["n_E5"]):  # C1 replays E5's data stream per seed
+        n, k = len(its["n_E5"]), int((its["n_E5"] < its["n_C1"]).sum())
+        tail = sum(math.comb(n, j) for j in range(max(k, n - k), n + 1)) / 2 ** n
+        print(f"C1 vs E5 paired by seed: E5 needs fewer updates on {k} of {n} (two-sided sign test p = {min(1, 2 * tail):.3f})")
     same = [s for s in (0, 1, 2) if (HERE / "runs" / f"n_E4_s{s}").exists()]
     for new, old in (("n_E4", "m_E4_coro_budget"), ("n_E5", "m_E5_tree_budget")):  # eval has its own RNG stream
         for s in same:
