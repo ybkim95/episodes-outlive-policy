@@ -24,6 +24,7 @@ for f in Path(os.environ.get("TALK_FONTS", "/nonexistent")).glob("*.ttf"):
 # Branched CORO, rust for failures; axis titles in small spaced capitals
 INK, MUTED, GRID, PAPER = "#161513", "#6B675F", "#E6E0D4", "#F9F6EF"
 TEAL, RUST, DARK, GREY, LIGHT = "#00897B", "#B4492F", "#3B3D37", "#8A847A", "#C4BCAE"
+TEAL_INK = "#176B64"  # teal for text
 PX = 0.72  # points per slide pixel at dpi 100
 plt.rcParams.update({
     "font.family": ["Inter", "DejaVu Sans"], "font.size": 22 * PX, "axes.titlesize": 24 * PX,
@@ -50,7 +51,26 @@ def save(f, name, tight=True):
 
 
 def label(ax, x, y, text, bold=False, **kw):
-    ax.text(x, y, text, color=INK, fontsize=24 * PX, fontweight=600 if bold else 400, va="center", **kw)
+    kw.setdefault("color", INK)
+    return ax.text(x, y, text, fontsize=24 * PX, fontweight=600 if bold else 400, va="center", **kw)
+
+
+def save_layers(f, name, groups, tight=True):
+    """Save the whole figure as name.png, then the same canvas split into layers a slide stacks and reveals one
+    click at a time: name_base.png holds every artist outside the groups, name_<key>.png only that group."""
+    if tight:
+        f.tight_layout(pad=0.4)
+    f.savefig(OUT / f"{name}.png", dpi=200)
+    kids = [c for ax in f.axes for c in ax.get_children()]
+    grouped = {a for arts in groups.values() for a in arts}
+    assert grouped <= set(kids), "a layer artist is not a direct child of an axes"
+    was = {c: c.get_visible() for c in kids}
+    keeps = [("base", lambda c: c not in grouped)] + [(k, (lambda s: lambda c: c in s)(set(v))) for k, v in groups.items()]
+    for key, keep in keeps:
+        for c in kids:
+            c.set_visible(was[c] and keep(c))
+        f.savefig(OUT / f"{name}_{key}.png", dpi=200)
+    plt.close(f)
 
 
 def caps(text):
@@ -111,27 +131,33 @@ def fig_main(runs):
             ("E4_coro_budget", "CORO + drift budget", DARK, "-", 3),
             ("E1_ppo", "PPO-clip, and CORO with no budget", LIGHT, "-", 2.5), ("E3_coro", None, LIGHT, "-", 2.5),
             ("E1b_naive", "ignore staleness", RUST, (0, (2, 3)), 2.5)]
-    cross = {}
+    cross, lines, curve = {}, {}, {}
     for cfg, lab, col, ls, lw in spec:
         xs, ys = zip(*(evals(r) for r in runs[cfg].values()))
         n = min(len(y) for y in ys)
         x, m = xs[0][:n] / 1e6, np.mean([y[:n] for y in ys], 0)
-        ax.plot(x, m, color=col, ls=ls, lw=lw, label=lab)
+        (lines[cfg],) = ax.plot(x, m, color=col, ls=ls, lw=lw, label=lab)
+        curve[cfg] = x, m
         i = np.argmax(m >= 0.9)
         cross[cfg] = x[i - 1] + (0.9 - m[i - 1]) / (m[i] - m[i - 1]) * (x[i] - x[i - 1]) if m.max() >= 0.9 else None
     a, b = cross["E5_tree_budget"], cross["E4_coro_budget"]
-    ax.annotate("", xy=(b, 0.9), xytext=(a, 0.9), arrowprops=dict(arrowstyle="-|>", color=INK, lw=1.8, mutation_scale=18,
-                                                                   shrinkA=6, shrinkB=6))
-    label(ax, (a + b) / 2, 0.86, "1.6×", ha="center", bold=True)
+    arrow = ax.annotate("", xy=(b, 0.9), xytext=(a, 0.9), arrowprops=dict(arrowstyle="-|>", color=INK, lw=1.8,
+                                                                           mutation_scale=18, shrinkA=6, shrinkB=6))
+    gain = label(ax, (a + b) / 2, 0.86, "1.6×", ha="center", bold=True)
+    x5, m5 = curve["E5_tree_budget"]
+    i = np.argmax(m5 >= 0.62)
+    xl = x5[i - 1] + (0.62 - m5[i - 1]) / (m5[i] - m5[i - 1]) * (x5[i] - x5[i - 1])
+    name5 = label(ax, xl - 0.07, 0.62, "Branched CORO\n+ drift budget", ha="right", bold=True, color=TEAL_INK)
     ax.text(0.03, 0.925, "0.9", color=MUTED, fontsize=20 * PX)
     ax.axhline(0.9, color=MUTED, lw=1, ls=(0, (1, 3)))
     ax.axhline(1 / 8, color=MUTED, lw=1, ls=(0, (1, 3)))
     ax.text(4.12, 0.155, "chance", color=MUTED, ha="right", fontsize=20 * PX)
-    ax.legend(loc="center right", bbox_to_anchor=(1.0, 0.56), frameon=False, labelcolor=INK, fontsize=24 * PX,
-              handlelength=1.8, borderaxespad=0)
+    ax.legend(handles=[lines[k] for k in ("E4_coro_budget", "E1_ppo", "E1b_naive")], loc="center right",
+              bbox_to_anchor=(1.0, 0.56), frameon=False, labelcolor=INK, fontsize=24 * PX, handlelength=1.8,
+              borderaxespad=0)
     ax.set(ylim=(0, 1.04), xlim=(0, 4.15), yticks=[0, 0.25, 0.5, 0.75, 1])
     titles(ax, "held-out goal rate, mean of 3 runs", "agent turns sampled (millions)")
-    save(f, "talk_main.png")
+    save_layers(f, "talk_main", {"teal": [lines["E5_tree_budget"], name5], "gain": [arrow, gain]})
 
 
 CONTROL_ROWS = [  # (label, run prefix, family)
@@ -149,8 +175,9 @@ def fig_controls():
     """Updates to 0.9 per seed (dots) and their mean (bar), for Branched CORO, its ablations and the flat controls."""
     f, ax = fig(1664, 560)
     f.subplots_adjust(left=0.36, right=0.90, top=0.97, bottom=0.17)
-    never = 745
+    never, tree = 745, []
     for i, (lab, pre, fam) in enumerate(CONTROL_ROWS):
+        arts = tree if fam == "tree" else []
         col = TEAL if fam == "tree" else GREY
         its = [first_at(read(f"{pre}_s{s}"), "iter") for s in (0, 1, 2)]
         got = [x for x in its if x is not None]
@@ -159,16 +186,17 @@ def fig_controls():
             v = never if x is None else x
             k = jit.setdefault(v, 0)
             jit[v] += 1
-            ax.plot(v, i + (k - 1) * 0.16 if its.count(x) > 1 else i, "o", ms=11, mew=2, mec=PAPER if x else col,
+            arts += ax.plot(v, i + (k - 1) * 0.16 if its.count(x) > 1 else i, "o", ms=11, mew=2, mec=PAPER if x else col,
                     color=col if x else "none", alpha=0.9, zorder=4)
         if len(got) == 3:
-            ax.plot([np.mean(got)] * 2, [i - 0.34, i + 0.34], color=INK, lw=3, zorder=5)
+            arts += ax.plot([np.mean(got)] * 2, [i - 0.34, i + 0.34], color=INK, lw=3, zorder=5)
             txt = f"{np.mean(got):.0f}"
         else:
             txt = f"{len(got)} of 3 runs"
-        ax.text(1.005, i, txt, transform=ax.get_yaxis_transform(), color=INK, va="center",
-                fontsize=24 * PX, fontweight=600 if fam == "tree" else 400)
-        ax.text(-0.02, i, lab, transform=ax.get_yaxis_transform(), color=INK, va="center", ha="right", fontsize=24 * PX)
+        arts.append(ax.text(1.005, i, txt, transform=ax.get_yaxis_transform(), color=INK, va="center",
+                fontsize=24 * PX, fontweight=600 if fam == "tree" else 400))
+        arts.append(ax.text(-0.02, i, lab, transform=ax.get_yaxis_transform(), color=INK, va="center", ha="right",
+                            fontsize=24 * PX))
     ax.axhline(2.5, color=GRID, lw=1.5)
     ax.text(never, 3.42, "never", color=MUTED, ha="center", va="center", fontsize=20 * PX)
     ax.set(ylim=(6.6, -0.6), yticks=[], xlim=(270, 775), xticks=[300, 400, 500, 600, 700])
@@ -176,7 +204,7 @@ def fig_controls():
     ax.grid(axis="y", visible=False)
     ax.spines["bottom"].set_visible(False)
     titles(ax, x="trainer updates to reach a 0.9 goal rate  ·  dots: 3 runs, bar: mean")
-    save(f, "talk_controls.png", tight=False)
+    save_layers(f, "talk_controls", {"teal": tree}, tight=False)
 
 
 def fig_severity():
@@ -184,22 +212,22 @@ def fig_severity():
             [{o: f"sev_q{q}_{o}" for o in ("ppo", "oapl", "coro", "none")} for q in (16, 48)]
     f, ax = fig(1000, 620)
     f.subplots_adjust(left=0.11, right=0.74, top=0.9, bottom=0.15)
-    ends = []
+    ends, arts = [], {}
     for obj, lab, col, mk, ls in [("ppo", "PPO-clip", DARK, "o", "-"), ("oapl", "OAPL", GREY, "s", "-"),
                                   ("coro", "CORO", LIGHT, "D", "-"), ("none", "ignore staleness", RUST, "o", (0, (2, 3)))]:
         v = [[final_goal(n[obj], s) for s in (0, 1, 2)] for n in names]
         means = [np.mean(vs) for vs in v]
-        ax.plot(range(3), means, color=col, lw=3, ls=ls, marker=mk, ms=11, mec=PAPER, mew=2)
-        ends.append((means[-1], lab))
+        arts[obj] = ax.plot(range(3), means, color=col, lw=3, ls=ls, marker=mk, ms=11, mec=PAPER, mew=2)
+        ends.append((means[-1], lab, obj))
     ys = spread([e[0] for e in ends], 0.07, 1.0)
-    for (_, lab), y in zip(ends, ys):
-        label(ax, 2.12, y, lab)
+    for (_, lab, obj), y in zip(ends, ys):
+        arts[obj].append(label(ax, 2.12, y, lab))
     ax.axhline(1 / 8, color=MUTED, lw=1, ls=(0, (1, 3)))
     ax.text(0, 0.155, "chance", color=MUTED, fontsize=20 * PX)
     ax.set_xticks(range(3), ["11", "31", "63"])
     ax.set(ylim=(0, 1.05), xlim=(-0.15, 2.1))
     titles(ax, "final goal rate, mean of 3 runs", "maximum staleness within an episode (trainer updates)")
-    save(f, "talk_severity.png", tight=False)
+    save_layers(f, "talk_severity", {"fail": arts["none"]}, tight=False)
 
 
 def fig_turn_budget():
@@ -231,7 +259,7 @@ def fig_turn_budget():
     a1.text(30, 1.25e-3, "floor", color=MUTED, fontsize=20 * PX)
     a1.set(yscale="log", xlim=(0, 1000), ylim=(7e-4, 0.6))
     titles(a1, "global β, log scale", "trainer updates")
-    save(f, "talk_turn_budget.png", tight=False)
+    save_layers(f, "talk_turn_budget", {"beta": list(a1.get_children())}, tight=False)
 
 
 def fig_beta_sweep():
